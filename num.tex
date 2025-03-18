@@ -1,0 +1,448 @@
+\documentclass[12pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\usepackage{lmodern}
+\usepackage{geometry}
+
+\usepackage{enumitem}
+\usepackage{xcolor}
+
+\usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{bm}
+
+\newcounter{lecture}
+\stepcounter{lecture}
+
+\newtheorem{theorem}{Theorem}[lecture]
+\newtheorem*{theorem*}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem*{example*}{Example}
+\newtheorem{xca}[theorem]{Exercise}
+
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem*{remark*}{Remark}
+
+\numberwithin{equation}{section}
+
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\normempty}{\|\cdot\|}
+\newcommand{\spectrum}[1]{\bm{\lambda}(#1)}
+
+\newcommand{\blockHorizonatl}[2]{
+  \left[
+    \begin{array}{c|c}
+      #1 & #2 \\
+    \end{array}
+  \right]
+}
+
+\newcommand{\blockVertical}[2]{
+  \left[
+    \begin{array}{c}
+      #1\\\hline
+      #2\\
+    \end{array}
+  \right]
+}
+
+\newcommand{\blockFull}[4]{
+  \left[
+    \begin{array}{c|c}
+      #1 & #2\\\hline
+      #3 & #4\\
+    \end{array}
+  \right]
+}
+
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
+\DeclarePairedDelimiter{\set}{\{}{\}}
+
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\offdiag}{offdiag}
+
+\title{Advanced Numerical Analysis}
+\author{Vladimir Kazeev}
+
+\begin{document}
+\maketitle
+
+\section{Linear algebra}
+\stepcounter{lecture}
+\subsection{Vectors and matrices}
+In this section the field $\F$ is $\R$ or $\C$. $m$ and $n$ always denote natural numbers.
+
+\begin{definition}
+  Let $V$ be a vector space over $\F$. A function $\normempty:\ V \rightarrow \R$ is called a norm on V if for all $v, w \in V$ and $\alpha \in \F$ the following properties hold:
+  \begin{enumerate}
+    \item $\norm{v}\geq 0$
+    \item $\norm{v} \neq 0 \quad \forall v \neq 0$
+    \item $\norm{\alpha v} = |\alpha| \norm{v}$
+    \item $\norm{v + w} \leq \norm{v} + \norm{w}$
+  \end{enumerate}
+\end{definition}
+
+\begin{example}
+  Let $V=\F^n$
+  \begin{itemize}
+    \item $\normempty_\infty:\ V \rightarrow \R: \ \norm{v}_\infty = \max_{i=1}^n |v_i| \quad \forall v \in V$
+    \item $\normempty_p:\ V \rightarrow \R: \ \norm{v}_p = \sqrt[p]{ \sum_{i=1}^n |v_i|^p } \quad \forall v \in V$ and $p \in [1, \infty)$
+  \end{itemize}
+  Also $\lim_{p \rightarrow \infty} \norm{v}_p = \norm{v}_\infty$
+\end{example}
+
+\begin{example}
+  $V=\F^{m\times n}$. Then we define $\normempty_{\max},\normempty_\textnormal{F}:\ \F^{m\times n} \rightarrow \R$ as follows:
+  \begin{itemize}
+    \item $\norm{A}_{\max} = \max_{i,j} |a_{ij}|$ \quad(maximum absolute value norm / Chebyshev norm)
+    \item $\norm{A}_\textnormal{F} = \sqrt{ \sum_{i,j}|a_{ij}|^2}$ \quad(Frobenius norm)
+  \end{itemize}
+\end{example}
+
+\begin{proposition}\label{prop:opnorm-is-norm}
+  Let $V,U$ be $\F$-vector spaces. $\mathcal{L}$ denotes the space of continuous (w.r.t. $\normempty_V$, $\normempty_U$) linear mappings from $V$ to $U$. Then $\normempty:\ \mathcal{L} \rightarrow \R$ given by
+  \begin{equation*}
+    \norm{\varphi} = \sup_{\mathclap{\substack{v \in V \\ \norm{v}_V=1}}} \norm{\varphi(v)}_U \quad \forall \varphi \in \mathcal{L}
+  \end{equation*}
+  is a norm.
+\end{proposition}
+\begin{definition}
+  The norm given in Proposition \ref{prop:opnorm-is-norm} is called the \emph{operator norm} on $\mathcal{L}$ induced by the norms $\normempty_V$ and $\normempty_U$.
+\end{definition}
+\begin{definition}
+  $V=\F^n$, $U=\F^m$. $\mathcal{L}$ is identified with $W=\F^{m\times n}$ using the standard basis.
+  \begin{gather*}
+    \varphi \in \mathcal{L} \quad \longleftrightarrow \quad A = \textnormal{Mat}(\varphi) \in W \\
+    \varphi(v) = Av
+  \end{gather*}
+  Let $\normempty$ be the operator norm on $\mathcal{L}$ induced by $\normempty_V$ and $\normempty_U$. Then $\normempty \cdot \textnormal{Mat}^{-1}:\ \F^{m \times n} \rightarrow \R$ is called the \emph{matrix operator norm} induced by $\normempty_V$ and $\normempty_U$.
+\end{definition}
+
+\begin{example}
+  For $p,q \in [1,\infty],\ W=\F^{m\times n}$.
+  \begin{equation*}
+    \normempty_{p,q}:\ W \rightarrow \R\text{ given by }\norm{A}_{p,q} = \max_{\mathclap{\substack{v \in \F^n \\ \norm{v}_q=1}}} \norm{Av}_p \quad \forall A \in W
+  \end{equation*}
+  is an (matrix) operator norm induced by $\normempty_p$ and $\normempty_q$.
+\end{example}
+
+\begin{definition}
+  For $p=q \in [1,\infty]$ we write $\normempty_{p,q} = \normempty_p$ and $\normempty_p$ is called the matrix p-norm on $\F^{m\times n}$.
+\end{definition}
+
+\begin{proposition}
+  $\F^{n\times 1} \simeq \F^n$. The matrix p-norm on $\F^{n\times 1}$ coincides with the vector p-norm on $\F^n$.
+\end{proposition}
+
+\begin{proposition}
+  For $A \in \F^{m\times n}$ the following holds:
+  \begin{alignat*}{3}
+    &\norm{A}_1 &&= \max_{j={1,\ldots,n}} \sum_{i=1}^m |a_{ij}| \quad &&\text{(column sum norm)} \\
+    &\norm{A}_\infty &&= \max_{i={1,\ldots,m}} \sum_{j=1}^n |a_{ij}| \quad &&\text{(row sum norm)} \\
+    &\norm{A}_2 &&= \sqrt{\lambda_{\max}(A^*A)} = \sigma_{\max}(A) \quad &&\text{(spectral norm)}\\
+    &&&= \max_{\mathclap{\substack{u \in \F^m \\ v \in \F^n \\ \norm{u}_2 = \norm{v}_2 = 1}}} u^*Av
+  \end{alignat*}
+  where $\lambda_{\max}$ is the largest eigenvalue and $\sigma_{\max}$ is the largest singular value of $A$.
+\end{proposition}
+
+\begin{definition}
+  $U = \F^{k \times m},V = \F^{m \times n},W = \F^{k \times n}$. Let $\normempty_U,\normempty_V,\normempty_W$ be norms on $U,V,W$ respectively. These norms are called \emph{consistent} (or \emph{submultiplicative}) if
+  \begin{equation*}
+    \norm{AB}_W \leq \norm{A}_U \norm{B}_V \quad \forall A \in U,B \in V
+  \end{equation*}
+  For $U = V = W$ and $\normempty_U = \normempty_V = \normempty_W$ this reduces to
+  \begin{equation*}
+    \norm{AB}_W \leq \norm{A}_W \norm{B}_W \quad \forall A,B \in W.
+  \end{equation*}
+\end{definition}
+
+\begin{proposition}~\\
+  \begin{itemize}
+    \item $p$-norm on $\F^{n \times n}$ is consistent for $p \in \{1, 2, \infty\}$
+    \item Frobenius norm on $\F^{n \times n}$ is consistent
+    \item Chebyshev norm on $\F^{n \times n}$ is \emph{not} consistent \\[0.5\baselineskip]
+      e.g. $A =
+      \begin{pmatrix} 1 & 1 \\ 1 & 1
+      \end{pmatrix}:\ \norm{A\cdot A}_{\max} = \norm{
+        \begin{pmatrix} 2 & 2 \\ 2 & 2
+      \end{pmatrix}}_{\max} = 2 \nleq 1 = \norm{A}_{\max} \norm{A}_{\max}$
+  \end{itemize}
+\end{proposition}
+\begin{proposition}
+  \label{prop:consistent-norms}
+  $U\in \F^{n \times n}$ invertible and $\normempty$ a norm on $\F^{n \times n}$. Consider $\normempty_*, \normempty_{**}, \normempty_{***}:\ \F^{n \times n} \rightarrow \R$ given by $\norm{A}_* = \norm{UA},\ \norm{A}_{**} = \norm{AU},\ \norm{A}_{***} = \norm{U^{-1}AU}$. These 3 functions are norms on $\F^{n \times n}$ and they are consistent if $\normempty$ is consistent.
+\end{proposition}
+
+\subsection{Eigenvalues of matrices}
+\begin{definition}
+  $A \in F^{n \times n}, \lambda \in \F$. If $\ker(A - \lambda I) \neq \{0\}$ then $\lambda$ is called an eigenvalue of $A$ and every non-zero vector from $\ker(A - \lambda I)$ is called an eigenvector of $A$ associated with the eigenvalue $\lambda$.
+\end{definition}
+
+\begin{definition}
+  $A \in \F^{n \times n}$. $\chi_A:\ \F \rightarrow \F$ given by $\chi_A(\lambda) = \det(A - \lambda I)\ \forall \lambda \in \F $ is called \emph{characteristic polynomial}.
+\end{definition}
+
+\begin{proposition}
+  \label{prop:charpoly-eigenvalues}
+  $A \in \F^{n \times n}$. $\chi_A$ is an algebraic polynomial of degree $n$ with leading coefficient $(-1)^n$. For any $\lambda \in \F$, $\lambda$ is an eigenvalue of $A$ if and only if $\chi_A(\lambda) = 0$.
+\end{proposition}
+\begin{definition}
+  \label{def:alg-mult}
+  $A \in \F^{n \times n}, \lambda \in \F$ eigenvalue of $A$. The \emph{algebraic multiplicity} of $\lambda$ is the multiplicity of $\lambda$ as a root of $\chi_A$.
+\end{definition}
+\begin{definition}
+  \label{def:geom-mult}
+  The \emph{geometric multiplicity} of $\lambda$ is the dimension of $\ker(A - \lambda I)$. $\lambda$ is called \emph{defective} if its geometric multiplicity is less than its algebraic multiplicity. If the geometric multiplicity of $\lambda$ is equal to its algebraic multiplicity then $\lambda$ is called \emph{non-defective} eigenvalue of $A$.
+\end{definition}
+
+\begin{example*}
+  $A = I \in \F^{n \times n}$. $\chi_A(\lambda) = \det(I - \lambda I) = (1-\lambda)^n$. So $\lambda=1$ is the only eigenvalue of $I$ with algebraic multiplicity $n$. We have that $\dim (\ker (A-I)) =  \dim( \ker (0)) = n$.
+
+  If $A \in \F^{n \times n}$ is a Jordan block of size $n \geq 2$, then there is only one eigenvalue, $\lambda=1$, with algebraic multiplicity $n$ and geometric multiplicity $\dim(\ker(A-I)) = 1<n$. So $\lambda=1$ is a defective eigenvalue of $A$.
+\end{example*}
+
+\subsection{Schur canonical form}
+\begin{definition}
+  $A\in \C^{n\times n}$. Assume that $Q \in \C^{n\times n}$ is unitary and that $T= Q^*AQ$ (which is equivalent to $A = QTQ^*$) is upper triangular. Then the factorization $A = QTQ^*$ is called a Schur decomposition of $A$ and $T$ is called a \emph{Schur canonical form}.
+\end{definition}
+
+\begin{proposition}
+  In the context of the previous definition, the diagonal entries of $T$ are the eigenvalues of $A$ repeated according to their algebraic multiplicities.
+\end{proposition}
+
+\begin{theorem}
+  \label{thm:schur-decomposition}
+  Let $A \in \C^{n \times n}$, $\lambda_1,\ldots,\lambda_n$ be the eigenvalues of $A$ repeated according to their algebraic multiplicities. Then there exists a unitary matrix $Q \in \C^{n \times n}$ such that $T = Q^*AQ$ is upper triangular with diagonal entries $\lambda_1,\ldots,\lambda_n$.
+\end{theorem}
+\begin{proof}
+  Let $x_1$ be a normalized eigenvector of $A$ associated with $\lambda_1$. Consider a matrix $X=\blockHorizonatl{x_1}{X_1} \in \C^{n\times n}$ unitary (with $X_1 \in \C^{n \times (n-1)}$). Then
+  \begin{align*}
+    X^*AX &= \blockVertical{x_1^*}{X_1} A \blockHorizonatl{x_1}{X_1} = \blockFull{x_1^* A x_1}{x_1^* A X_1}{X_1^* A x_1}{X_1^* A X_1}\\
+    &=\left[
+      \begin{array}{c|c}
+        X^*Ax_1 &
+        \begin{array}{c}x_1^* A X_1 \\ X_1^* A X_1 \\
+        \end{array}\\
+    \end{array}\right] = \blockFull{\lambda_1}{x_1^*AX_1}{0}{X_1^*AX_1} = \blockFull{\lambda_1}{t_1^*}{0}{A_1}
+  \end{align*}
+  where $t_1=X_1^*A^*x_1 \in \C^{n-1}$ and $A_1 = X_1^*AX_1 \in \C^{(n-1)\times(n-1)}$. For any $\lambda \in \C$, we have that $\det(A-\lambda I) = \det(X^*AX - \lambda I) = (\lambda_1 - \lambda) \det(A_1 - \lambda I)$. The following are equivalent for all $\lambda \in \C, m \in \N$:
+  \begin{enumerate}[label=(\roman*)]
+    \item $\lambda$ is a root of $\chi_A$ of multiplicity $m$
+    \item $\lambda$ is a root of $\chi_{A_1}$ of multiplicity $
+      \begin{cases}
+        m & \text{if } \lambda \neq \lambda_1\\
+        m-1 & \text{if } \lambda = \lambda_1
+      \end{cases}$
+  \end{enumerate}
+  Then by Proposition \ref{prop:charpoly-eigenvalues} and Definition \ref{def:alg-mult} $\lambda_1, \ldots, \lambda_n$ are the eigenvalues of $A$ repeated according to their algebraic multiplicities. Assume that there exists a unitary matrix $Q_1 \in \C^{(n-1)\times(n-1)}$ such that $T_1 = Q_1^*A_1Q_1$ is upper triangular with diagonal entries $\lambda_2,\ldots,\lambda_n$. Then $Q = X \blockFull{1}{}{}{Q_1}$ and $T = \blockFull{\lambda_1}{t_1^*Q_1}{}{T_1}$ fullfill the claim for $A$:
+  \begin{align*}
+    Q^*AQ &= \blockFull{1}{}{}{Q_1^*} X^*AX \blockFull{1}{}{}{Q_1} = \blockFull{1}{}{}{Q_1^*} \blockFull{\lambda_1}{t_1^*}{}{A_1} \blockFull{1}{}{}{Q_1} = \blockFull{\lambda_1}{t_1^*Q_1}{}{T_1}
+  \end{align*}
+  For $n=1$: $Q=[1], T = A $ fullfill the claim. By induction the claim holds (for any $n\in \N$).
+\end{proof}
+
+\begin{remark*} For square matrices $A \in \C^{n \times n}$ and $S \in \C^{n \times n}$ invertible, the following holds:
+  \begin{align*}
+    \det(S^{-1}AS) &= \det(S^{-1}) \det(A) \det(S) = \det(A) \\
+    \chi_{S^{-1}AS}(\lambda) &= \det(S^{-1}AS - \lambda I) = \det(S^{-1}(A - \lambda I)S) \\
+    &= \det(S^{-1}) \det(A - \lambda I) \det(S) = \det(A - \lambda I) = \chi_A(\lambda)
+  \end{align*}
+  That is, the eigenvalues of $A$ and $S^{-1}AS$ coincide.
+\end{remark*}
+
+{\color{red}
+  \begin{theorem*}[Spectral theorem]
+    Let $n\in N$. $A \in \F^{n \times n}$ is diagonalizable by \dots
+    \begin{itemize}[label={}]
+      \item $\F = \C$: \dots an unitary similarity transformation $\Leftrightarrow$ $A$ is normal
+      \item $\F = \R$: \dots an orthogonal similarity transformation $\Leftrightarrow$ $A$ is symmetric
+    \end{itemize}
+\end{theorem*}}
+
+\begin{remark*}
+  There can be non-hermitian normal matrices, e.g. $A =
+  \begin{pmatrix}
+    i & 1 \\ 0 & i
+  \end{pmatrix}$
+\end{remark*}
+
+\stepcounter{lecture}
+\begin{remark}
+  For $A \in \C^{n \times n}$. By theorem \ref{thm:schur-decomposition} $A$ has a Schur form $T$. It is easy to check that $A$ is normal if and only if $T$ is normal.
+  \begin{equation*}
+    (A = QTQ^*, \text{ so } A^*A - AA^* = Q(T^*T - TT^*)Q^* = 0 \Leftrightarrow T^*T = TT^*)
+  \end{equation*}
+  It is left as an exercise to show that
+  \begin{equation*}
+    T \text{ is normal} \Leftrightarrow T \text{ is diagonal}.
+  \end{equation*}
+  So the Schur form is a generalization of diagonalization by unitary similarity transformations for normal matrices to abitrary matrices.
+\end{remark}
+
+\subsection{Spectral radius of a matrix: The behavior of matrix powers}
+
+\begin{definition}
+  For $A \in \F^{n \times n}$ the set of eigenvalues of $A$ is called the \emph{spectrum} of $A$. We will denote the spectrum of $A$ by $\spectrum{A}$. (i.e., $\spectrum{A}$ is the zero set of $\chi_A$).
+\end{definition}
+
+\begin{definition}
+  For $A \in \F^{n \times n}$, $\rho(A) = \max_{\lambda \in \spectrum{A}} |\lambda|$ is called the \emph{spectral radius} of $A$. Any $\lambda \in \spectrum{A}$ with $|\lambda| = \rho(A)$ is called a \emph{dominant eigenvalue} of $A$.
+\end{definition}
+
+\begin{lemma}
+  Let $\normempty$ be a consistent norm on $\F^{n \times n}$. Then $\rho(A) \leq \norm{A}$ for all $A \in \F^{n \times n}$.
+\end{lemma}
+
+\begin{proof}
+  (Auxiliary result: Consider $y \in \C^n$ non-zero. Let $\normempty_*:\ \F^n \rightarrow \R$ be given by $\norm{x}_* = \norm{xy^*} \quad \forall x \in \F^n$. Then $\norm{Ax}_* = \norm{(Ax)y^*} = \norm{A(xy^*)} \leq \norm{A} \norm{xy^*} = \norm{A} \norm{x}_*$. So the norms $\normempty_*, \normempty, \normempty_*$ are consistent norms.)
+
+  Let $\normempty_{*}$ be a norm on $\F^{n \times n}$ with which $\normempty$ is consistent (i.e. $\normempty_{*}, \normempty, \normempty_{*}$ are consistent). Let  $\lambda \in \F$ be an eigenvalue of $A$ and $x \in \F^n$ an associated eigenvector of unit length w.r.t. $\normempty_{*}$. Then $\norm{A} = \norm{A}\norm{x}_* \geq \norm{Ax}_* = \norm{\lambda x}_* = |\lambda| \norm{x}_* = |\lambda|$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:consistent-norms-spectral-radius}
+  Let $A \in \F^{n \times n}$ and $\varepsilon > 0$. Then there exists a consistent norm $\normempty_{A,\varepsilon}$ on $\F^{n \times n}$ such that $\norm{A}_{A,\varepsilon} \leq \rho(A) + \varepsilon$.
+
+  If the dominant eigenvalues of $A$ are non-defective, then there exists a consistent norm $\normempty_{A}$ on $\F^{n \times n}$ such that $\norm{A}_{A} = \rho(A)$.
+\end{lemma}
+
+\begin{proof}
+  By theorem \ref{thm:schur-decomposition}, $A$ has a Schur decomposition $A = QTQ^*$ with $Q \in \C^{n \times n}$ unitary and $T \in \C^{n \times n}$ upper triangular. Let $\Lambda = \diag(T)$ and $U = T - \Lambda = \offdiag(T)$ (so $\Lambda = \diag(\lambda_1,\ldots, \lambda_n)$ in the context of theorem \ref{thm:schur-decomposition}, $U$ is strictly upper triangular).
+
+  For $\eta > 0$ consider $D_{\eta} = \diag(\eta^0, \eta^1, \ldots, \eta^{n-1}) \in \C^{n\times n}$ then, for all $i,j \in \{1,\ldots,n\}$, we have
+  \begin{equation*}
+    (D_{\eta}^{-1}UD_{\eta})_{ij} = \eta^{1-i}U_{ij}\eta^{j-1} =
+    \begin{cases}
+      0 & \text{if } i \geq j\\
+      \eta^{j-i}U_{ij} & \text{if } i < j
+    \end{cases}
+  \end{equation*}
+  So there exists $\eta_* > 0$ such that $\norm{D_{\eta_*}^{-1}UD_{\eta_*}}_{\infty} < \varepsilon$. Let $D= D_{\eta_{*}}$. Then
+  \begin{align*}
+    \norm{D^{-1}Q^*AQD}_{\infty} &= \norm{D^{-1}\Lambda D + D^{-1}UD}_{\infty} = \norm{\Lambda + D^{-1}UD}_{\infty} \\ &\leq \norm{\Lambda}_{\infty} + \norm{D^{-1}UD}_{\infty} < \rho(A) + \varepsilon
+  \end{align*}
+  Let us define $\normempty_{A,\varepsilon}:\ \C^{n\times n} \rightarrow \R$ by $\norm{B}_{A,\varepsilon} = \norm{D^{-1}Q^*BQD}_{\infty}$. By proposition \ref{prop:consistent-norms} $\normempty_{A,\varepsilon}$ is a consistent norm on $\C^{n \times n}$. On the other hand, $\normempty_{A} < \rho(A) + \varepsilon$.
+
+  For the second claim, let us assume that $\lambda_1, \ldots, \lambda_k$ with $k \in \{1,\ldots,n\}$ are the dominant eigenvalues of $A$ (i.e. $|\lambda_1|=\ldots=|\lambda_k|=\rho(A)>|\lambda_{k+1}|,\ldots,|\lambda_n|$) and that they are non-defective.
+
+  If $\rho(A)=0$, then $\lambda_1=\ldots =\lambda_n = 0$, so 0 is a non-defective eigenvalue of $A$ with algebraic multiplicity = geometric multiplicity = $n$, so $A=0$. Then any consistent norm fullfills the claim.
+
+  If $k=n$, all eigenvalues are non-defective. Then $A$ is diagonalizable, i.e. there is $S \in \C^{n\times n} \text{ invertible such that } A=S\Lambda S^{-1} \text{ with } \Lambda = S^{-1}AS \text{ diagonal.}$
+  Let $\normempty_{A}:\ \C^{n\times n} \rightarrow \R$ be given by $\norm{B}_{A} = \norm{S^{-1}BS}_{\infty}$ for all $B \in \C^{n \times n}$. As discussed earlier, $\normempty_{A}$ is a consistent norm and $\norm{A}_{A} = \norm{\Lambda}_{\infty} = \rho(A)$.
+
+  For the remainder of the proof, assume that $k<n$. Let $\Lambda_1 = \diag(\lambda_1,\ldots,\lambda_k) \in \C^{k\times k}$ and $\Lambda_2 = \diag(\lambda_{k+1},\ldots,\lambda_n) \in \C^{(n-k)\times(n-k)}$. Then $\Lambda = \blockFull{\Lambda_1}{}{}{\Lambda_2} \in \C^{n\times n}$. We consider a Schur decomposition $A = QTQ^*$ with $Q$ unitary and $T$ upper triangular with $\diag(T) = \Lambda$. Partition T as $T = \blockFull{T_{1}}{T_{12}}{}{T_{2}}$ with $T_{11} \in \C^{k\times k}$. We have:
+
+  \begin{enumerate}[label=(\roman*)]
+    \item Every dominant eigenvalue of $A$ is not an eigenvalue of $T_2$ but is an eigenvalue of $T_1$.
+    \item For all $\lambda \in \{\lambda_1,\ldots,\lambda_k\}$, $T_2 - \lambda I$ is invertible, so we have $\dim(\ker(A - \lambda I)) = \dim(\ker(T - \lambda I)) = \dim(\ker(T_1 - \lambda I))$.
+  \end{enumerate}
+
+  So $T_1$ is diagonalizable: $\exists S_1 \in \C^{k\times k}$ invertible such that $S_1^{-1} T_1 S_1 = \Lambda_1$. Let us consider the matrix $S = \blockFull{S_1}{}{}{I_2}$ with $I_2 \in \C^{(n-k)\times(n-k)}$ the identity matrix. We have
+  \begin{equation*}
+    S^{-1}Q^*AQS = S^{-1}TS = \blockFull{\Lambda_1}{}{}{\Lambda_2} + \blockFull{0}{T_{12}}{0}{U_2}
+  \end{equation*}
+  where $U_2 = T_2 - \Lambda_2 = \offdiag(T_2)$ is strictly upper triangular.
+
+  Consider $\eta > 0, D=\diag(\eta^0,\ldots,\eta^{n-1}) = \blockFull{D_1}{}{}{D_2}$ with $D_1 \in \C^{k\times k}$.
+  \begin{equation*}
+    D^{-1}S^{-1}Q^*AQSD = \blockFull{\Lambda_1}{}{}{\Lambda_2} + \blockFull{0}{Z_{12}}{0}{Z_2}
+  \end{equation*}
+  where $Z_{12} = D_1^{-1}T_{12}D_2$ and $Z_2 = D_2^{-1}U_2D_2$. We will consider $\normempty_A:\ \C^{n\times n} \rightarrow \R$ given by $\norm{B}_A = \norm{D^{-1}S^{-1}Q^*BQSD}_1$ for all $B \in \C^{n \times n}$. Again, $\normempty_A$ is a consistent norm.
+
+  Block $Z_2$: $U_2$ is strictly upper triangular, so $Z_2$ is strictly upper triangular. For all $i,j \in \{1,\ldots,n-k\}$ such that $i < j$ we have
+  \begin{equation*}
+    (Z_2)_{ij} = \eta^{j-i}(U_2)_{ij} \xrightarrow{\eta \rightarrow 0} 0
+  \end{equation*}
+
+  Block $Z_{12}$: For all $i \in \{1,\ldots,k\}$ and $j \in \{1,\ldots,n-k\}$ we have
+  \begin{equation*}
+    (Z_{12})_{ij} = \frac{\eta^{k+j}}{\eta^i} (T_{12})_{ij} = \eta^{k-i} \eta^{j} (T_{12})_{ij} \xrightarrow{\eta \rightarrow 0} 0
+  \end{equation*}
+  So $\norm*{\blockVertical{Z_{12}}{Z_2}}_1 \xrightarrow{\eta \rightarrow 0} 0$. So there exists $\eta_* > 0$ such that $\norm*{\blockVertical{Z_{12}}{Z_2}}_1 < \frac{1}{2}(\norm{\Lambda_1}_1 - \norm{\Lambda_2}_1)$. For $D$ defined with $\eta = \eta_*$ we have
+
+  \begin{align*}
+    \norm{A}_A &= \norm{D^{-1}S^{-1}Q^*AQSD}_1 = \norm*{\blockFull{\Lambda_1}{}{}{\Lambda_2} + \blockFull{0}{Z_{12}}{0}{Z_2}}_1 \\[0.5\baselineskip]
+    &= \max\set*{{\norm{\Lambda_1}_1, \norm*{\blockVertical{Z_{12}}{\Lambda_2 + Z_2}}_1}} = \norm{\Lambda_1}_1 = \rho(A)
+  \end{align*}
+
+  where we used
+  \begin{align*}
+    \norm*{\blockVertical{Z_{12}}{\Lambda_2 + Z_2}}_1 &\leq \norm{\Lambda_2}_1 + \norm*{\blockVertical{Z_{12}}{Z_2}}_1 < \norm{\Lambda_2}_1 + \frac{1}{2}(\norm{\Lambda_1}_1 - \norm{\Lambda_2}_1) \\[0.5\baselineskip]
+    &= \frac{1}{2}(\norm{\Lambda_1}_1 + \norm{\Lambda_2}_1) < \norm{\Lambda_1}_1 = \norm{\Lambda}_1=\rho(A)
+  \end{align*}
+\end{proof}
+
+\begin{lemma}
+  Let $A \in \C^{n\times n}$ and $\normempty$ be a norm on $\C^{n\times n},\ \varepsilon>0$, then there exists $c>0$ (depending on $n$, $\normempty$, but not on $A$ or $\varepsilon$) and $C>0$ (depending on $n$, $\normempty$, $A$ and $\varepsilon$) such that
+  \begin{equation*}
+    c \rho^k \leq \norm{A^k} \leq C (\rho + \varepsilon)^k \quad \forall k \in \N \quad \text{  where $\rho = \rho(A)$.}
+  \end{equation*}
+  If the dominant eigenvalues of $A$ are non-defective, the same holds with $\varepsilon = 0$.
+\end{lemma}
+
+\begin{proof}
+  \begin{enumerate}[label={(\roman*)}]
+    \item For the lowerbound, consider a dominant eigenvalue $\lambda \in \C$ of $A$ and a corresponding eigenvector, s.t. $\norm{x}_2 = 1$. Then $\norm{A^kx}_2 = \norm{\lambda^k x}_2 = |\lambda|^k \norm{x}_2 = \rho^k$. By the equivalence of norms, there exists $c>0$ such that $c \norm{B}_2 \leq \norm{B}$ for all $B \in \C^{n \times n}$. So $\norm{A^k} \geq c \norm{A^kx}_2 = c \rho^k$ for all $k \in \N$.
+    \item For the upperbound: Let $\normempty_{A,\varepsilon}$ be a consistent norm on $\C^{n \times n}$ such that $\norm{A}_{A,\varepsilon} \leq \rho(A) + \varepsilon$ (Lemma \ref{lem:consistent-norms-spectral-radius}). Consistency yields $\norm{A^k}_{A,\varepsilon} \leq \norm{A}_{A,\varepsilon}^k$, so $\norm{A^k}_{A,\varepsilon} \leq (\rho + \varepsilon)^k$ for all $k \in \N$.
+
+      By the equivalence of norms, there exists $C>0$ (depending on $n$, $\normempty$, $A$ and $\varepsilon$) such that $\norm{B} \leq C \norm{B}_{A,\varepsilon}$ for all $B \in \C^{n \times n}$. So $\norm{A^k} \leq C \norm{A^k}_{A,\varepsilon} \leq C (\rho + \varepsilon)^k$ for all $k \in \N$.
+    \item If the dominant eigenvalues of $A$ are non-defective, the same holds with $\varepsilon = 0$.
+  \end{enumerate}
+\end{proof}
+
+\begin{remark*}
+  Taking k-th root and limit $k \rightarrow \infty$ in the previous lemma yields
+  \begin{equation*}
+    \rho(A) \leq \lim_{k \rightarrow \infty} \norm{A^k}^{1/k} \leq \rho(A) + \varepsilon
+  \end{equation*}
+  if the middle limit exists.
+\end{remark*}
+
+\begin{definition}
+  $A \in \C^{n \times n}$ is called
+  \begin{itemize}
+    \item row-wise (non-)strictly diagonally dominant if
+      \begin{equation*}
+        |a_{ii}| >(\geq) \sum_{j \in \set{1,\ldots,n} \setminus \set{i}}|a_{ij}| \quad \forall i
+        \in \set{1,\ldots,n}
+      \end{equation*}
+    \item column-wise (non-)strictly diagonally dominant if
+      \begin{equation*}
+        |a_{jj}| >(\geq) \sum_{i \in \set{1,\ldots,n} \setminus \set{j}}|a_{ij}| \quad \forall j
+        \in \set{1,\ldots,n}
+      \end{equation*}
+  \end{itemize}
+\end{definition}
+
+\begin{theorem}[Levy-Desplanques]
+  For any $A \in \C^{n \times n}$, if $A$ is row-wise or column-wise strictly diagonally dominant, then it is invertible.
+\end{theorem}
+
+\begin{definition}[Gerschgorin dishes]
+  Let $A \in \C^{n \times n}$. For each $k \in \set{1,\ldots, n}$
+  \begin{align*}
+    \mathcal{R}_k &= \set*{z \in \C:\ |z-a_{kk}| \leq \sum_{j \in \set{1,\ldots,n} \setminus \set{k}} |a_{kj}|\subset \C} \\
+    \mathcal{C}_k &= \set*{z \in \C:\ |z-a_{kk}| \leq \sum_{i \in \set{1,\ldots,n} \setminus \set{k}} |a_{ik}|\subset \C}
+  \end{align*}
+  are called the $k$-th row-wise and column-wise \emph{Gerschgorin dishes} of $A$.
+\end{definition}
+
+\begin{theorem}[1st Gerchgorin theorem]
+  Let $A \in \C^{n \times n}$. Then
+  \begin{equation*}
+    \spectrum{A} \subseteq \bigcup_{k=1}^n \mathcal{R}_k,\ \spectrum{A}\subseteq\bigcup_{k=1}^n \mathcal{C}_k.
+  \end{equation*}
+\end{theorem}
+\end{document}

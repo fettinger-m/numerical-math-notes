@@ -1,0 +1,8 @@
+{
+    "C^nxn": {
+        "prefix": "cnn",
+        "body": [
+            "\\C^{n\\times n}"
+        ]
+    },
+}
