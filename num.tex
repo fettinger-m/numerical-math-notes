@@ -991,21 +991,21 @@ $A \in \F^{n\times n}$ Hermitian positive definite ($\F = \R$: symmetric) and $b
   By Lemma \ref{lem:7.6}, we have $y_k = y_{k-1} + \alpha_k p_k$ with $\alpha_k = \frac{p_k^* r_{k-1}}{p_k^* A p_k}$, so $\alpha_k = \frac{r_{k-1}^* r_{k-1}}{p_k^* A p_k}$ for any $k \in \set{1,\ldots,m}$. This implies $r_k = r_{k-1} - A (x_k - x_{k-1}) = r_{k-1} - \alpha_k A p_k \ \forall k \in \set{1,\ldots,m}$. Finally, for each $k \in \set{1,\ldots,m-1}$, by Lemma 7.5, we have $p_{k+1} = r_k + \beta_k p_k$ with $\beta_k = - \frac{p_k^* A r_k}{p_k^* A p_k}$. Since $r_{k-1} \neq 0$, we have $\alpha_k \neq 0$ and hence $A_{p_k} = \frac{1}{\alpha_k}(r_{k-1} - r_k)$. Then $r_k^* A p_k = \frac{1}{\alpha_k} (\underbrace{r_k^* r_{k-1}}_{\mathclap{=0\text{ since } r_k \perp \K_k}} - r_k^* r_k) = - \frac{1}{\alpha_k} r_k^* r_k$. So $\beta_k = \frac{r_k^* r_k}{p_k^* A p_k} \cdot \frac{1}{\overline{\alpha}_k} = \frac{r_k^*r_k}{p_k^*Ap_k} \cdot \frac{1}{\alpha_k} = \frac{r_k^* r_k}{r_{k-1}^* r_{ k-1 }}$.
 \end{proof}
 
-\begin{algorithm}[The conjugate gradient method]~\\
+\begin{algorithm}[The conjugate gradient method]~\\[\parskip]
   \label{alg:7.8}
   Given: $A \in \F^{n\times n}$ Hermitian positive definite, $b \in \F^n$ and $x_0 \in \F^n$ s.t. $b-Ax_0 \neq 0$.
 
-  \noindent Initialize: set $r_0 = b - Ax_0$ and $p_1 = r_0$.
+  Initialize: set $r_0 = b - Ax_0$ and $p_1 = r_0$.
 
-  \noindent Iterate for $k = 1,2, \ldots$:
+  Iterate for $k = 1,2, \ldots$\::
 
-  set $\alpha_k = \frac{r_{k-1}^* r_{k-1}}{p_k^* A p_k}$, set $x_k = x_{k-1} + \alpha_k p_k$
+  \hspace{2em} set $\alpha_k = \frac{r_{k-1}^* r_{k-1}}{p_k^* A p_k}$, set $x_k = x_{k-1} + \alpha_k p_k$
 
-  set $r_k = r_{k-1} - \alpha_k A p_k$
+  \hspace{2em} set $r_k = r_{k-1} - \alpha_k A p_k$
 
-  if $r_k$ is zero (or ``small''), then terminate
+  \hspace{2em} if $r_k$ is zero (or ``small''), then terminate
 
-  set $\beta_k = \frac{r_k^* r_k}{r_{k-1}^* r_{k-1}}$, set $p_{k+1} = r_k + \beta_k p_k$.
+  \hspace{2em} set $\beta_k = \frac{r_k^* r_k}{r_{k-1}^* r_{k-1}}$, set $p_{k+1} = r_k + \beta_k p_k$.
 \end{algorithm}
 \begin{remark*}
   Only need to store $x_k,\ r_k,\ p_k$ (and $A p_k$ maybe) and compute  only one matrix-vector product $A p_k$ per iteration.
@@ -1278,7 +1278,65 @@ Our assumptions: $k \in \N,\ A \in \F^{n\times n}$ Hermitian positive definite, 
   \end{align*}
   First,
   \begin{align*}
-    \tilde{\alpha}_k &= \frac{\tilde{r}_{k-1}^* C^{-1} \overbrace{C C^*}^{P^{-1}} C^{-*} \tilde{r}_{k-1}}{\tilde{p}_k^* C^* A C \tilde{p}_k} = \frac{(C^{-*}\tilde{r}_{k-1})^*P^{-1}(C^{-*}\tilde{r}_{k-1})}{(C \tilde{p}_k)^* A (C \tilde{p}_k)} =
+    \tilde{\alpha}_k &= \frac{\tilde{r}_{k-1}^* C^{-1} \overbrace{C C^*}^{P^{-1}} C^{-*} \tilde{r}_{k-1}}{\tilde{p}_k^* C^* A C \tilde{p}_k} = \frac{(C^{-*}\tilde{r}_{k-1})^*P^{-1}(C^{-*}\tilde{r}_{k-1})}{(C \tilde{p}_k)^* A (C \tilde{p}_k)} \\[0.5\baselineskip]
+    \textcolor{red}{r_k=\ }C^{-*}\tilde{r}_{k} &= C^{-*} \tilde{r}_{k-1} - \tilde{\alpha}_k C^{-*} C^* A C \tilde{p}_k = C^{-*} \tilde{r}_{k-1} - \tilde{\alpha}_k A \underbrace{C \tilde{p}_k}_{\textcolor{red}{v_k}}\\
+    \textcolor{red}{v_{k+1}=\ }C \tilde{p}_{k+1} &= C \tilde{r}_k + \tilde{\beta}_k C \tilde{p}_k = C C^* C^{-*} \tilde{r}_{k} + \tilde{\beta}_k C \tilde{p}_k = P^{-1} \underbrace{C^{-*} \tilde{r}_{k}}_{\textcolor{red}{r_k}} + \tilde{\beta}_k \underbrace{C \tilde{p}_k}_{\textcolor{red}{v_k}}\\
+    \textcolor{red}{x_k=\ }C \tilde{x}_k &= \underbrace{C \tilde{x}_{k-1}}_{\textcolor{red}{x_{k-1}}} + \tilde{\alpha}_k C \tilde{p}_k
   \end{align*}
+  \textcolor{red}{($\rightarrow\ r_k = b - Ax_k$ holds)}
+
+  \TODO[Ask about the $\tilde{x_k}$ definition. Kazeev did write $\tilde{p}_{k-1}$ instead of $\tilde{p}_k$]
+  \begin{equation*}
+    \color{red}
+    \tilde{\alpha}_k = \frac{r_{k-1}^* P^{-1} r_{k-1}}{p_k^* A p_k} \quad \text{ and } \quad \tilde{\beta}_k = \frac{r_k^* P^{-1} r_k}{r_{k-1}^* P^{-1} r_{k-1}}
+  \end{equation*}
+  \textcolor{red}{
+    We can evaluate
+    \begin{equation*}
+      z_0 = P^{-1} r_0, \quad v_1 = C \tilde{p}_1 = C \tilde{r}_0 = P^{-1} r_0 = z_0.
+    \end{equation*}
+    For $k \in \N$, assuming $z_{k-1} = P^{-1} r_{k-1}$ and $v_k = C \tilde{p}_k$ have been evaluated, we define
+    \begin{equation*}
+      z_k = P^{-1} r_k \quad \text{ and } \quad v_{k+1} = C \tilde{p}_{k+1}
+    \end{equation*}
+  }
 \end{remark*}
+\begin{algorithm}[The preconditioned CG method, PCG]~\\[\parskip]
+  \label{alg:9.3}
+  Given: $A, P \in \F^{n\times n}$ Hermitian positive definite, $b, x_0 \in \F^n$ such that $b - Ax_0 \neq 0$
+
+  Initialize: set $r_0 = b - Ax_0,\ z_0 = P^{-1} r_0,\ v_1 = z_0$
+
+  Iterate for $k = 1,2,\ldots$\::
+
+  \hspace{2em} set $\tilde{\alpha}_k = \frac{r_{k-1}^* z_{k-1}}{v_k^* A v_k}$
+
+  \hspace{2em} set $x_k = x_{k-1} + \tilde{\alpha}_k v_k$
+
+  \hspace{2em} set $r_k = r_{k-1} - \tilde{\alpha}_k A v_k$
+
+  \hspace{2em} if $r_k = 0$, then terminate
+
+  \hspace{2em} set $z_k = P^{-1} r_k$
+
+  \hspace{2em} set $\tilde{\beta}_k = \frac{r_k^* z_k}{r_{k-1}^* z_{k-1}}$
+
+  \hspace{2em} set $v_{k+1} = z_k + \tilde{\beta}_k v_k$
+\end{algorithm}
+
+\begin{proposition}
+  \label{prop:9.4}
+  Let $A, P \in \F^{n\times n}$ be Hermitian positive definite, $b, x_0 \in \F^n$ such that $b - Ax_0 \neq 0$. $C \in \F^{n\times n}$ be such that $P^{-1} = CC^*$. Let $\tilde{x}_0 = C^{-1} x_0$. Let $\tilde{x}_1, \ldots, \tilde{x}_k \in \F^{n\times n}$ and $x_1 = C \tilde{x}_1, \ldots, x_k = C \tilde{x}_k$.
+
+  Then the following statements are equivalent:
+  \begin{enumerate}[label=(\roman*)]
+    \item Algorithm \ref{alg:7.8} applied to $(C^* A C)x = C^* b$ produces iterates $x_1, \ldots, x_k$.
+    \item Algorithm \ref{alg:9.3} applied to $Ax = b$ with preconditioner $P$ produces iterates $\tilde{x}_1, \ldots, \tilde{x}_k$.
+  \end{enumerate}
+\end{proposition}
+\begin{proof}
+  Given above.
+\end{proof}
+
+Note that $\norm{x_k - x}_A = \norm{\tilde{x_k} - \tilde{x}}_A$
 \end{document}
