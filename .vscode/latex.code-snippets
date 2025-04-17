@@ -5,4 +5,10 @@
             "\\C^{n\\times n}"
         ]
     },
+    "F^nxn": {
+        "prefix": "fnn",
+        "body": [
+            "\\F^{n\\times n}"
+        ]
+    },
 }

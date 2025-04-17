@@ -1,13 +1,15 @@
 \documentclass[12pt]{article}
-
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 
 \usepackage{lmodern}
 \usepackage{geometry}
+\usepackage{multicol}
+\usepackage{parskip}
 
 \usepackage{enumitem}
 \usepackage{xcolor}
+\usepackage{mdframed}
 
 \usepackage{mathtools}
 \usepackage{amssymb}
@@ -20,12 +22,14 @@
 \newtheorem{theorem}{Theorem}[lecture]
 \newtheorem*{theorem*}{Theorem}
 \newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
 \newtheorem{proposition}[theorem]{Proposition}
 
 \theoremstyle{definition}
 \newtheorem{definition}[theorem]{Definition}
 \newtheorem{example}[theorem]{Example}
 \newtheorem*{example*}{Example}
+\newtheorem{algorithm}[theorem]{Algorithm}
 \newtheorem{xca}[theorem]{Exercise}
 
 \theoremstyle{remark}
@@ -38,10 +42,13 @@
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\C}{\mathbb{C}}
 \newcommand{\N}{\mathbb{N}}
+\newcommand{\K}{\mathcal{K}}
+\renewcommand{\Re}{\textnormal{Re}}
 \newcommand{\normempty}{\|\cdot\|}
 \newcommand{\spectrum}[1]{\bm{\lambda}(#1)}
 
-\newcommand{\blockHorizonatl}[2]{
+\newcommand{\TODO}[1][]{\textcolor{red}{\textbf{TODO\ifblank{#1}{}{:\ }#1} }}
+\newcommand{\blockHorizontal}[2]{
   \left[
     \begin{array}{c|c}
       #1 & #2 \\
@@ -69,16 +76,21 @@
 
 \DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
 \DeclarePairedDelimiter{\set}{\{}{\}}
+\DeclarePairedDelimiter{\abs}{\lvert}{\rvert}
+\DeclarePairedDelimiter{\iprod}{\langle}{\rangle}
 
+\DeclareMathOperator{\mathspan}{span}
 \DeclareMathOperator{\diag}{diag}
 \DeclareMathOperator{\offdiag}{offdiag}
+\DeclareMathOperator{\argmin}{argmin}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\cond}{cond}
 
 \title{Advanced Numerical Analysis}
 \author{Vladimir Kazeev}
 
 \begin{document}
 \maketitle
-
 \section{Linear algebra}
 \stepcounter{lecture}
 \subsection{Vectors and matrices}
@@ -227,9 +239,9 @@ In this section the field $\F$ is $\R$ or $\C$. $m$ and $n$ always denote natura
   Let $A \in \C^{n \times n}$, $\lambda_1,\ldots,\lambda_n$ be the eigenvalues of $A$ repeated according to their algebraic multiplicities. Then there exists a unitary matrix $Q \in \C^{n \times n}$ such that $T = Q^*AQ$ is upper triangular with diagonal entries $\lambda_1,\ldots,\lambda_n$.
 \end{theorem}
 \begin{proof}
-  Let $x_1$ be a normalized eigenvector of $A$ associated with $\lambda_1$. Consider a matrix $X=\blockHorizonatl{x_1}{X_1} \in \C^{n\times n}$ unitary (with $X_1 \in \C^{n \times (n-1)}$). Then
+  Let $x_1$ be a normalized eigenvector of $A$ associated with $\lambda_1$. Consider a matrix $X=\blockHorizontal{x_1}{X_1} \in \C^{n\times n}$ unitary (with $X_1 \in \C^{n \times (n-1)}$). Then
   \begin{align*}
-    X^*AX &= \blockVertical{x_1^*}{X_1} A \blockHorizonatl{x_1}{X_1} = \blockFull{x_1^* A x_1}{x_1^* A X_1}{X_1^* A x_1}{X_1^* A X_1}\\
+    X^*AX &= \blockVertical{x_1^*}{X_1} A \blockHorizontal{x_1}{X_1} = \blockFull{x_1^* A x_1}{x_1^* A X_1}{X_1^* A x_1}{X_1^* A X_1}\\
     &=\left[
       \begin{array}{c|c}
         X^*Ax_1 &
@@ -262,15 +274,16 @@ In this section the field $\F$ is $\R$ or $\C$. $m$ and $n$ always denote natura
   That is, the eigenvalues of $A$ and $S^{-1}AS$ coincide.
 \end{remark*}
 
-{\color{red}
-  \begin{theorem*}[Spectral theorem]
-    Let $n\in N$. $A \in \F^{n \times n}$ is diagonalizable by \dots
-    \begin{itemize}[label={}]
-      \item $\F = \C$: \dots an unitary similarity transformation $\Leftrightarrow$ $A$ is normal
-      \item $\F = \R$: \dots an orthogonal similarity transformation $\Leftrightarrow$ $A$ is symmetric
-    \end{itemize}
-\end{theorem*}}
-
+\begin{mdframed}[linecolor=magenta, linewidth=1pt]
+  {\color{magenta}
+    \begin{theorem*}[Spectral theorem]
+      Let $n\in N$. $A \in \F^{n \times n}$ is diagonalizable by \dots
+      \begin{itemize}[label={}]
+        \item $\F = \C$: \dots an unitary similarity transformation $\Leftrightarrow$ $A$ is normal
+        \item $\F = \R$: \dots an orthogonal similarity transformation $\Leftrightarrow$ $A$ is symmetric
+      \end{itemize}
+  \end{theorem*}}
+\end{mdframed}
 \begin{remark*}
   There can be non-hermitian normal matrices, e.g. $A =
   \begin{pmatrix}
@@ -385,6 +398,7 @@ In this section the field $\F$ is $\R$ or $\C$. $m$ and $n$ always denote natura
 \end{proof}
 
 \begin{lemma}
+  \label{lem:matrix-powers}
   Let $A \in \C^{n\times n}$ and $\normempty$ be a norm on $\C^{n\times n},\ \varepsilon>0$, then there exists $c>0$ (depending on $n$, $\normempty$, but not on $A$ or $\varepsilon$) and $C>0$ (depending on $n$, $\normempty$, $A$ and $\varepsilon$) such that
   \begin{equation*}
     c \rho^k \leq \norm{A^k} \leq C (\rho + \varepsilon)^k \quad \forall k \in \N \quad \text{  where $\rho = \rho(A)$.}
@@ -429,6 +443,7 @@ In this section the field $\F$ is $\R$ or $\C$. $m$ and $n$ always denote natura
 \begin{theorem}[Levy-Desplanques]
   For any $A \in \C^{n \times n}$, if $A$ is row-wise or column-wise strictly diagonally dominant, then it is invertible.
 \end{theorem}
+\TODO[Proof]
 
 \begin{definition}[Gerschgorin dishes]
   Let $A \in \C^{n \times n}$. For each $k \in \set{1,\ldots, n}$
@@ -445,4 +460,825 @@ In this section the field $\F$ is $\R$ or $\C$. $m$ and $n$ always denote natura
     \spectrum{A} \subseteq \bigcup_{k=1}^n \mathcal{R}_k,\ \spectrum{A}\subseteq\bigcup_{k=1}^n \mathcal{C}_k.
   \end{equation*}
 \end{theorem}
+\TODO[Proof]
+
+\section{Iterative methods for linear systems}
+We consider the problem of finding a solution $x \in \F^n$ of the linear system $Ax = b$ with $A \in \F^{n \times n}$ the matrix of the linear system and $b \in \F^n$ the right-hand side. $A$ and $b$ is the data of the problem. We assume that $A$ is invertible, so the system has a unique solution $x = A^{-1}b$.
+
+Iterative methods (in contrast to direct methods) perform a sequence of computation steps (iterations) that produce an \emph{approximation} (an approximate solution, an iterate) to the the exact solution $x$. The main question is:
+\begin{quote}
+  How close is the approximate solution to the exact solution?
+\end{quote}
+
+$k \in \N$ will denote the iteration index. An iterative method produces iterates $(x_1,x_2,\ldots) = (x_k)_{k \in \N}$ from an \emph{initial guess} (initial approximation) $x_0 \in \F^n$. We are interested in the errors $e_k = x_k - x \in \F^n$. So the above question is how $\norm{e_k}$ behaves w.r.t. $k\in \N$, where $\normempty$ is a norm on $\F^n$.
+
+\subsection{Linear iterative methods}
+$e_k = T_k \cdot e_{k-1}$ for all $k \in \N$, where $T_k \in \F^{n \times n}$ is the \emph{iteration matrix} at iteration $k$. For some methods we have $T_k = T$ for all $k \in \N$, where $T \in \F^{n \times n}$ -- those are \emph{stationary methods}.
+
+Let $A_1, A_2 \in \F^{n \times n}$ be such that $A=A_1 + A_2$. Then the linear system $Ax = b$ can be rewritten as
+\begin{align*}
+  A_1x + A_2x &= b \\
+  \Leftrightarrow A_1x &= b - A_2x \\
+  \Leftrightarrow A_1x_k &= b - A_2x_{k-1}  = b - Ax_{k-1} + A_1 x_{k-1}\\
+  \Leftrightarrow x_k &= A_1^{-1}(b - A_2x_{k-1}) \\
+\end{align*}
+For each $k \in \N$, let $x_k$ be given by the above equation. Also we can see:
+\begin{align*}
+  x_k &= x_{k-1} + A_1^{-1}(b - Ax_{k-1}) \\
+  &= (I-A_1^{-1}A)x_{k-1} + A_1^{-1}b \\
+  &= (I - A_1^{-1}A)(x+e_{k-1}) + A_1^{-1}b = x + (I - A_1^{-1}A)e_{k-1} \\
+\end{align*}
+\begin{align*}
+  \Rightarrow e_k &= (I - A_1^{-1}A)e_{k-1} = -A_1^{-1} A_2e_{k-1} \\
+\end{align*}
+
+Consider $A\in \F^{n\times n}$ invertible. Let $D,L,U \in$ be the diagonal, strictly lower triangular and upper triangular part of $A$ respectively. I.e.
+\begin{equation*}
+  D_{ij} =
+  \begin{cases}
+    A_{ij} & \text{if } i = j\\
+    0 & \text{else}
+  \end{cases},\quad L_{ij} =
+  \begin{cases}
+    A_{ij} & \text{if } i > j\\
+    0 & \text{else}
+  \end{cases},\quad U_{ij} =
+  \begin{cases}
+    A_{ij} & \text{if } i < j\\
+    0 & \text{else}
+  \end{cases}
+\end{equation*}
+Then $A = D + L + U$.
+
+\begin{center}
+  \bgroup
+  \def\arraystretch{2}%
+  \begin{tabular}{l | l}
+    Jacobi iteration & Gauss-Seidel iteration \\
+    \hline
+    $A_1=D, A_2=L+U$ & $A_1=D+L, A_2=U$ \\
+    \hline
+    \multicolumn{2}{c}{$A_1$ is invertible $\Leftrightarrow$ the diagonal entries of $A$ are all non-zero} \\
+    \hline
+    $x_k = D^{-1}(b - (L+U)x_{k-1})$ & $x_k = (D+L)^{-1}(b - Ux_{k-1})$ \\
+    $e_k = x_k - x = T e_{k-1}$ with & $e_k = x_k - x = T e_{k-1}$ with \\
+    $T = -D^{-1}(L+U)$ & $T = -(D+L)^{-1}U$ \\
+    \hline
+    \multicolumn{2}{c}{So $\norm{e_k} = \norm{T^k e_0} \leq \norm{T}^k \norm{e_0}$ for a consistent norm.}
+  \end{tabular}
+  \egroup
+\end{center}
+
+Let us denote the iteration matrices as follows
+\begin{equation*}
+  J = -D^{-1}(L+U),\quad G = -(D+L)^{-1}U.
+\end{equation*}
+We assume that $A$ (and therefore $D$ and $D+L$) has no zeroes on the diagonal.
+
+\stepcounter{lecture}
+
+\begin{theorem}
+  Let $A \in \C^{n\times n}$ be row-wise and column-wise strictly diagonally dominant. Then $D$ and $D+L$ are invertible and $\rho(J) < 1$ and $\rho(G) < 1$.
+\end{theorem}
+\TODO[Proof]
+
+\begin{corollary}
+  Let $A \in \C^{n\times n}$ be row-wise and column-wise strictly diagonally dominant. Then the linear system $Ax = b$ has a unique solution $x \in \C^n$ and the Jacobi and Gauss-Seidel iterations converge to $x$ for any initial guess $x_0 \in \C^n$. Furthermore, for any norm $\normempty$ on $\C^n$ and for either method, the iterates $(x_k)_{k \in \N}$ satisfy with any $\varepsilon \in (0, 1-\rho)$, where $\rho = \rho(T) < 1$ and $C$ positive constant:
+  \begin{equation*}
+    \norm{x_k - x} \leq C (\rho + \varepsilon)^k \norm{x_0 - x}
+  \end{equation*}
+  with $x_{k-1} - x = T^k (x_0 - x)$.
+\end{corollary}
+
+\begin{example}
+  \TODO
+\end{example}
+
+Towards generalization: consider a splitting $A = P_k - N_k$ with $P_k \in \F^{n\times n}$ invertible and the associated iteration
+\begin{equation*}
+  \boxed{x_k} = P_k^{-1}(N_k x_{k-1} + b) = P_k^{-1}N_k x_{k-1} + P_k^{-1}b = \boxed{B_k x_{k-1} + P_k^{-1}b}
+\end{equation*}
+with $B_k = P_k^{-1}N_k = I - P_k^{-1}A$, the $k$th \emph{iteration matrix} for all $k \in \N$. Also note
+\begin{equation*}
+  \boxed{x_k} = (I - P_k^{-1}A)x_{k-1} + P_k^{-1}b =  P_k^{-1}(P_k x_{k-1} - Ax_{k-1} + b) = \boxed{x_{k-1} + P_k^{-1} r_{k-1}}
+\end{equation*}
+where $r_{k-1} = b - Ax_{k-1} = Ae_{k-1}$ is the \emph{residual vector} at step $k$. Also
+\begin{equation*}
+  \boxed{e_k} = x_k - x = x_{k-1} - x + P_k^{-1} A(x_{k-1} - x) = (I - P_k^{-1}A)(x_{k-1} - x) = \boxed{B_k e_{k-1}}
+\end{equation*}
+
+\begin{mdframed}
+  If $\norm{B_k} \leq \rho$ for all $k \in \N$ and for some $\rho \in (0,1)$ and a norm $\normempty$ on $\F^n$, then this yields the exponential convergence of the iterates $(x_k)_{k \in \N}$ to the exact solution $x$.
+\end{mdframed}
+
+\subsection{Stationary linear iterative schemes}
+$P_k$ is the same for all $k \in \N$ (so are $N_k$ and $B_k$).
+\begin{quote}
+  When is such a method efficient?
+\end{quote}
+\begin{itemize}
+  \item $U \mapsto P^{-1}U$ should be easy to evaluate
+  \item $P$ should approximate $A$ in the sense that $P^{-1}A \approx I$ (precisely, $\rho(B)$, should be as small as possible)
+\end{itemize}
+$P$ is often called a preconditioner for $A$.
+
+\stepcounter{lecture}
+
+\begin{example}
+  \begin{itemize}
+    \item[]
+    \item Jacobi iteration: $U \mapsto D^{-1}U$ takes $\mathcal{O}(n)$ operations
+    \item Gauss-Seidel iteration: $U \mapsto (D+L)^{-1}U$ takes $\mathcal{O}(n^2)$ operations
+  \end{itemize}
+  After $K$ iterations $\sim Kn$ operations for Jacobi and $\sim Kn^2$ operations for Gauss-Seidel, which is $\ll n^3$ if $K \ll n$
+\end{example}
+
+\begin{example}[related stationary linear iterative schemes]
+  \begin{itemize}
+    \item[]
+    \item Backwards Gauss-Seidel method: $P = D + U$. The analysis and behavior are analogous to the Gauss-Seidel method.
+    \item Jacobi over-relaxation (JOR)
+
+      $P = \frac{1}{\omega}D,\ \omega > 0$ is a \emph{relaxation parameter} (``learning rate'')
+      \begin{gather*}
+        x_k = x_{k-1} + \omega D^{-1} r_{k-1}
+      \end{gather*}
+    \item Successive over-relaxation (SOR)
+
+      $P = \frac{1}{\omega}D + L,\quad x_k = x_{k-1} + \omega (D+\omega L)^{-1} r_{k-1} \ \forall k \in N$
+      \begin{enumerate}[label={(\roman*)}]
+        \item does not change for any $\omega \in (0,2]$
+        \item If $A$ is symmetric positive definite, the SOR iteration converges for any $\omega \in (0,2)$.
+      \end{enumerate}
+  \end{itemize}
+\end{example}
+\begin{remark}[Any $b$?  Any $x_0$?]
+  The behaviour of the $(x_k)_{k \in \N}$ is determined by $(P_k)_{k \in \N}$ and
+  \begin{itemize}
+    \item the initial residual or
+    \item the initial error
+  \end{itemize}
+  For any RHS $b \in \F^n$ and for all $k \in \N$ we have
+  \begin{align*}
+    x_k &= x_{k-1} + P_k^{-1} r_{k-1} \\
+    r_k &= b - Ax_k = b - Ax_{k-1} - A P_k^{-1} r_{k-1} = (I - AP_k^{-1})r_{k-1} \\
+    e_k &= A^{-1}r_k = (I - P_k^{-1}A)e_{k-1}
+  \end{align*}
+  $b \leftarrow b - Ax_0$ and $x_0 \leftarrow 0$ (does not effect initial residual and the initial error)
+\end{remark}
+
+\begin{theorem}
+  A $\in \C^{n\times n}$. A \emph{stationary} linear iterative scheme associated with $P \in \C^{n\times n}$ invertible converges for a zero initial guess to the solution of $Ax = b$ with any $b \in \C^n$ if and only if $\rho(I - P^{-1}A) < 1$.
+\end{theorem}
+
+\begin{proof}
+  Let $\rho = \rho(I-P^{-1}A)$. Consider a norm $\normempty$ on $\C^n$ and the corresponding operator norm $\normempty$ on $\C^{n\times n}$. Then $\norm{B^ku} \leq \norm{B}^k \norm{u}$ for all $u \in \C^n$. If $\rho < 1$, then the upper bound given by \ref{lem:matrix-powers} with $\varepsilon = \frac{1}{2} (1-\rho)$ (s.t. $\rho + \varepsilon < 1$) yields that the method converges exponentially to any RHS $b \in \C^n$.
+
+  $\rightarrow$ if $\rho \geq 1$, consider an eigenvector $u \in \C^n$ of the iteration matrix $B$ corresponding to a dominant eigenvalue $\lambda$. Then $\norm{B^k u}_k = \rho^k \norm{u}$ for all $k \in \N$. So $B^k u \nrightarrow 0$ as $k \rightarrow \infty$. So the method does not converge when $e_0 = u$ (i.e. for $x_0 = 0$ and $b = Au$).
+\end{proof}
+
+\begin{remark}
+  For stationary methods we can first precondition the problem and then consider an iterative scheme with preconditioned $I$.
+
+  Define $\tilde{A} = P^{-1}A$ and $\tilde{b} = P^{-1}b$. Then for all $x \in \C^n$ we have $Ax = b \Leftrightarrow \tilde{A}x = \tilde{b}$. The residuals, for any $x \in \C^n$ are $r = b - Ax,\ \tilde{r} = \tilde{b} - \tilde{A}x = P^{-1}r$. A linear iterative scheme for the original system with preconditioner $P$
+  \begin{equation*}
+    x_k = x_{k-1} + P^{-1}r_{k-1}
+  \end{equation*}
+  is equivalent to a linear iterative scheme for the preconditioned system with preconditioner $I$:
+  \begin{equation*}
+    \tilde{x}_k = \tilde{x}_{k-1} + \tilde{r}_{k-1}
+  \end{equation*}
+  that is, $\tilde{x}_k = x_k\ \forall k \in \N$ if $\tilde{x}_0 = x_0$.
+\end{remark}
+
+\subsection{Richardson iteration}
+\begin{definition}
+  $A \in \F^{n\times n}, b \in \F^n$. The stationary Richardson method for $Ax=b$ with an initial guess $x_0 \in \F^n$ is given by
+  \begin{equation*}
+    x_k = x_{k-1} + \alpha r_{k-1} \quad \forall k \in \N
+  \end{equation*}
+  where $r_{k-1} = b - Ax_{k-1}$ is the residual vector and $\alpha \in \R\setminus\set{0}$ is a relaxation parameter.
+
+  The non-stationary Richardson method is given by
+  \begin{equation*}
+    x_k = x_{k-1} + \alpha_k r_{k-1} \quad \forall k \in \N
+  \end{equation*}
+  with $\alpha_k \in \R\setminus\set{0}$.
+
+  The iteration matrix is given by $T_k = I - \alpha_k A$.
+\end{definition}
+\begin{theorem}
+  Let $A \in \C^{n\times n}$. The stationary Richardson method with zero initial guess converges (for any linear system $Ax = b$) if and only if
+  \begin{equation*}
+    \frac{2 \Re \lambda}{\alpha |\lambda|^2} > 1 \quad \forall \lambda \in \spectrum{A}
+  \end{equation*}
+\end{theorem}
+\begin{proof}
+  \TODO
+\end{proof}
+
+\begin{theorem}
+  Let $A \in \C^{n\times n}$, $\spectrum{A} = \set{\lambda_1,\ldots,\lambda_n} \subset \R$ with $\lambda_1 \geq \ldots \geq \lambda_n > 0$. Then the stationary Richardson scheme for $Ax = b$ converges with any $b \in \C^n$ if and only if $\alpha \in (0, \frac{2}{\lambda_1})$.
+
+  Furthermore, $\alpha_* = \frac{2}{\lambda_1+\lambda_n}$ is the unique minimizer of $\rho(B)$ with respect to $\alpha \in \R\setminus\set{0}$, and it yields $\rho(B) = \frac{\kappa - 1}{\kappa + 1} = \frac{\lambda_1 - \lambda_n}{\lambda_1 + \lambda_n}$.
+
+  ($\kappa = \frac{\lambda_1}{\lambda_n}$ is the spectral condition number of $A$)
+\end{theorem}
+\begin{proof}
+  \TODO
+\end{proof}
+
+\subsection{Iteration methods for systems with symmetric positive matrices}
+$\spectrum{A} = \set{\lambda_k}_{k=1}^n \subseteq \R$ with $\lambda_1 \geq \ldots \geq \lambda_n$. Then $A$ is positive definite if and only if
+\begin{equation*}
+  \min_{x \in \R^n \setminus \set{0}} \frac{x^*Ax}{x^*x} = \lambda_n > 0
+\end{equation*}
+
+$Ax = b$ for $x \in \R^n$ is the (necessary and !sufficient!) \emph{1st order optimality condition} for minimizing $J: \R^n \rightarrow \R$ given by
+\begin{equation*}
+  J(x) = \frac{1}{2}x^TAx - b^Tx \quad \forall x \in \R^n
+\end{equation*}
+
+Note:
+\begin{align*}
+  \nabla J(x) &= Ax - b = -r(x) \quad \forall x \in \R^n \\
+  \nabla^2 J(x) &= A \quad \forall x \in \R^n
+\end{align*}
+But A is positive definite $\Leftrightarrow$ $J$ is strictly convex $\Leftrightarrow$ $J$ has a unique minimum (sufficient condition).
+
+For any $e \in \R^n$ and the exact solution $x$, we have
+\begin{align*}
+  J(x+e) - J(x) &= \frac{1}{2}(x+e)^TA(x+e) - b^T(x+e) - \frac{1}{2}x^TAx + b^Tx \\
+  &= \frac{1}{2}e^TAe + \underbrace{x^TAe - b^Te}_{=-e^T r(x)} \underbrace{=}_{{r(x) = 0}} \frac{1}{2}e^TAe
+\end{align*}
+
+Since $A$ is SPD the function $\normempty_A:\ \R^n \rightarrow \R$ given by $\norm{u}_A = \sqrt{u^TAu}$ is a norm on $\R^n$. Then
+\begin{equation*}
+  J(x+e) - J(x) = \frac{1}{2} \norm{e}_A^2
+\end{equation*}
+
+\subsubsection*{Gradient-type methods for systems with SPD matrices.}
+
+Solve $Ax = b$, $b \in \R^n$ with $A \in \R^{n\times n}$ SPD and $x_0 \in \R^n$ an initial guess. The gradient descent method is given by
+\begin{equation*}
+  x_k = x_{k-1} - \alpha_k \nabla J(x_{k-1}) \quad \forall k \in \N,
+\end{equation*}
+where $\nabla J(x_{k-1}) = -r(x_{k-1})$.
+
+For the steepest gradient method, choose $\alpha_k$ so as to minimize $J$ along $\nabla J(x_{k-1})$:
+\begin{multline*}
+  J(x_{k-1} + \alpha_k r_k) = \frac{1}{2} \alpha_k^2 r_{k-1}^T A r_{k-1} + \alpha_k r_{k-1}^T A x_{k-1} \\+ \frac{1}{2} x_{k-1}^T A x_{k-1} -\alpha_k b^T r_{k-1} - b^T x_{k-1} \quad \forall \alpha_k \in \N
+\end{multline*}
+The optimal value of $\alpha_k$ is given by
+\begin{equation*}
+  \alpha_k = \frac{(b-Ax_{k-1})^T r_{k-1}}{r_{k-1}^T A r_{k-1}} = \frac{r_{k-1}^T r_{k-1}}{r_{k-1}^T A r_{k-1}} = \frac{\norm{r_{k-1}}_2^2}{\norm{r_{k-1}}_A^2}
+\end{equation*}
+
+\stepcounter{lecture}
+
+\begin{lemma}
+  $A \in \R^{n\times n}$ is SPD. Then there is a unique SPD matrix $B \in \R^{n\times n}$ such that $B^2 = A$.
+\end{lemma}
+\begin{proof}
+  $A$ is SPD $\Rightarrow\ \exists \Lambda \in \R^{n\times n}$ diagonal, $Q \in \R^{n\times n}$ orthogonal s.t. $A = Q^* \Lambda Q$ with positive diagonal entries. W.L.O.G. let $\Lambda = \diag(\lambda_1 I_{s_1},\ldots,\lambda_r I_{s_r})$ with $\lambda_1, \ldots, \lambda_r$ distinct positive and $s_1, \ldots, s_r$ in $\N$ such that $s_1 + \ldots + s_r = n$.
+
+  For $B=Q \Lambda^\frac{1}{2}Q^T$ where $\Lambda^\frac{1}{2} = \diag(\sqrt{\lambda_1} I_{s_1},\ldots,\sqrt{\lambda_r} I_{s_r})$ we have $B^2 = Q \Lambda Q^T = A$.
+
+  Let $\tilde{B} \in \R^{n \times n}$ be an SPD matrix such that $\tilde{B}^2 = A$. Since $\tilde{B}$ is SPD there exists a spectral decomposition $\tilde{B} = \tilde{Q}D \tilde{Q}^T$.
+
+  $\tilde{B}^2 = A \Rightarrow \tilde{Q}D^2 \tilde{Q}^T = A, \ D^2$ is similar to $A$ and hence to $\Lambda$. $D^2$ and $\Lambda$ are diagonal, so the diagonal entries coincide up to a permutation.
+
+  W.L.O.G assume $D^2 = \Lambda$. Then $A = Q \Lambda Q^T = \tilde{Q} \Lambda \tilde{Q}^T$.
+
+  Partition $Q$ and $\tilde{Q}$: $Q = [Q_1, \ldots, Q_r]$ and $\tilde{Q} = [\tilde{Q}_1, \ldots, \tilde{Q}_r]$ with $Q_k,\ \tilde{Q}_k \in \R^{n \times s_k} \quad \forall k \in \set{1,\ldots,r}$.
+
+  For each $k \in \set{1,\ldots,r}$, the columns of $Q_k$ and the columns of $\tilde{Q}_k$ form an orthogonal basis for the same subspace, the eigenspace corresponding to $\lambda_k$.
+
+  $\Rightarrow \exists V_k \in \R^{s_k \times s_k}$ orthogonal s.t. $\tilde{Q}_k = Q_k V_k \forall k \in \set{1,\ldots,r}$. So $\tilde{Q} = Q
+  \begin{bmatrix}
+    V_1 & & \\
+    & \ddots & \\
+    & & V_r
+  \end{bmatrix}$
+  \begin{equation*}
+    \tilde{B} = \tilde{Q} \Lambda^{\frac{1}{2}} \tilde{Q}^T = Q V \Lambda^{\frac{1}{2}} V^T Q^T = Q \Lambda^{\frac{1}{2}} Q^T = B
+  \end{equation*}
+  because
+  \begin{equation*}
+    V \Lambda^{\frac{1}{2}} V^T =
+    \begin{pmatrix}
+      V_1 \sqrt{ \lambda_1 } I_{s_1} V_1^T & & \\
+      & \ddots & \\
+      & & V_r \sqrt{ \lambda_r } I_{s_r} V_r^T
+    \end{pmatrix} =
+    \begin{pmatrix}
+      \sqrt{\lambda_1} I_{s_1} & & \\
+      & \ddots & \\
+      & & \sqrt{\lambda_r} I_{s_r}
+    \end{pmatrix}
+  \end{equation*}
+  $B$ is called the principle square root of $A$ or the SPD square root of $A$.
+\end{proof}
+\begin{theorem}
+  \label{thm:richardson-error}
+  Let $A, M \in \R^{n\times n}$ be commuting SPD matrices. Then the Richardson iteration for $Ax = b$ with $b \in \R^n$ satisfies
+  \begin{align*}
+    \norm{e_k}_M &\leq \norm{I - \alpha_n A}_2 \norm{e_{k-1}}_M \text{ and} \\
+    \norm{e_k}_M &\leq \norm{(I-\alpha_k A)\cdots (I-\alpha_1 A)}_2 \norm{e_0}_M \quad \forall k \in \N
+  \end{align*}
+\end{theorem}
+\begin{proof}
+  \TODO[]
+\end{proof}
+
+\emph{I dont really know how to put the following things in the notes.}
+
+\begin{mdframed}
+  Gradient descent with $\alpha_n$ optimal for the given extreme eigenvalues.
+\end{mdframed}
+vs
+
+\begin{mdframed}
+  Steepest gradient descent with $\alpha_k = \frac{\norm{r_{k-1}}_2^2}{\norm{r_{k-1}}_A^2}$
+\end{mdframed}
+Richardson iteration: $x_k = x_{k-1} + \alpha_k r_{k-1}$,
+
+Start $x_0 \in \F^n$
+
+$r_k = b - Ax_k$
+
+$\alpha_k$ are relaxation parameters.
+
+\vspace{\topsep}
+Let $\mathcal{K}_k = \mathcal{K}_k(A, r_0) = \textnormal{span}\set{A_j r_0}_{j=0}^{k-1} = \textnormal{span} \set{r_0, A r_0, \ldots, A^{k-1} r_0}$. Obviously $\mathcal{K}_k \subseteq \mathcal{K}_{k+1} \forall k \in \N$.
+\begin{remark}
+  $r_{k-1} \in \mathcal{K}_k$ and $x_k - x_0 \in \mathcal{K}_k \quad \forall k \in \N$.
+
+  \TODO[Proof]
+\end{remark}
+\begin{remark}
+  At step $k$, we, update the current iterate along the current residual, $x_{k-1} - x_0 \in \mathcal{K}_{k-1}$, $x_k - x_{k-1} \in \mathnormal{span}\set{r_{k-1}}$. So $\mathcal{K}_k = \mathcal{K}_{k-1} + \textnormal{span}\set{r_{k-1}} \quad \forall k \in \N$.
+\end{remark}
+\begin{remark}
+  For all $k \in \N$,
+  \begin{equation*}
+    e_k = (I - \alpha_k A) \ldots (I - \alpha_1 A) e_0 = q_k(A)e_0
+  \end{equation*}
+  where $q_k(A) \in P_k$, an algebraic polynomials of degree $k$ given by
+  \begin{equation*}
+    q_k = (1 - \alpha_k t) \cdots (1 - \alpha_1 t) = \sum_{j=0}^k c_j t^j \ \forall t \in \F
+  \end{equation*}
+  We have
+  \begin{equation*}
+    q_k(A) = \sum_{j=0}^k c_j A^j = (I - \alpha_k A) \cdots (I - \alpha_1 A) \ \forall A \in \F^{n \times n}
+  \end{equation*}
+  Denote $Q_k = \set{q \in P_k:\ deg(q) = k, q(0) = 1} \subset P_k$. The iterative method implies
+  \begin{equation*}
+    e_k = q_k(A)q(A)e_0 \text{ with } q_k \in Q_k
+  \end{equation*}
+  On the other hand: For $\F = \C$, if $\tilde{q}_k \in Q_k$, then 0 is not a root of $\tilde{q}_k$. So
+  \begin{equation*}
+    \tilde{q}_k(t) = \prod_{j=1}^k (1 - \tilde{\alpha}_j t)\ \forall t \in \C \text{ with some } \tilde{\alpha}_1, \ldots, \tilde{\alpha}_k \in \C \setminus \set{0}
+  \end{equation*}
+  and the iteration $x_k = x_{k-1} + \tilde{\alpha}_k r_{k-1}$ satisifies $e_k = \tilde{q}_k(A)e_0$.
+\end{remark}
+\begin{remark}
+  Let $q_k \in Q_k$ be such that $e_k = q_k(A)e_0\ \forall k \in \N$. Then
+  \begin{align*}
+    x_k - x_0 &= e_k - e_0 = -(I-q_k(A))e_0 \\
+    &= (I-q_k(A))A^{-1} r_0 = \pi_k(A) r_0 \quad \forall k \in \N_0
+  \end{align*}
+  where $\pi_0 = 0 \in P_0$ and $\pi_k \in P_{k-1}$ (due to $q_k \in Q_k$) is given by
+  \begin{equation*}
+    \pi_k(t) = \frac{1}{t} (1 - q_k(t)) \quad \forall t \in \F
+  \end{equation*}
+  so $x_k = x_0 + \underbrace{\pi_k(A) r_0}_{\in \K_k}$.
+
+  For $\F = \R$, consider $M \in \R^{n\times n}$ commuting with $A$. By Theorem \ref{thm:richardson-error} $\norm{e_k}_M \leq \norm{q_k(A)}_2 \norm{e_0}_M$. If $A$ is SPD, it has a spectral decomposition $A = Q \Lambda Q^T$ with $Q$ orthogonal and $\Lambda$ diagonal. Then
+  \begin{equation*}
+    q_k(A) = Q q_k(\Lambda) Q^T \text{ and }\norm{q_k(A)}_2 = \norm{q_k(\Lambda)}_2 = \max_{t \in \spectrum{A}} |q_k(t)|
+  \end{equation*}
+\end{remark}
+\stepcounter{lecture}
+\begin{definition}
+  Let $A \in \F^{n\times n},\ b \in \F^n$. For each $k \in \N_0$,
+  \begin{equation*}
+    \K_k(A,b) = \mathspan\set{A^j b}_{j=0}^{k-1} \subseteq \F^n
+  \end{equation*}
+  is the $k$th \emph{Krylov subspace} of $A$ generated by $b$.  In particular,
+  \begin{equation*}
+    \K_k(A,b) = \K_{k-1} (A,b) + \mathspan\set{A^{k-1} b}
+  \end{equation*}
+  with $\K_0(A,b) = \mathspan\set{0}$ and $\dim \K_0(A,b) = 0$, so we have $\K_{k-1} \subseteq K_k$ and $\dim \K_k \leq k$ for all $k \in \N$.
+\end{definition}
+\begin{remark*}
+  \begin{itemize}
+    \item Jacobi: $x_k - x_0 \in \K(D^{-1}A, D^{-1}(b-Ax_0))$
+    \item Gauß-Seidel: $x_k - x_0 \in \K((D+U)^{-1}A, (D+U)^{-1}(b-Ax_0))$
+  \end{itemize}
+\end{remark*}
+\begin{proposition}
+  \label{prop:7.2}
+  $A \in \F^{n\times n}, b \in \F^n, k \in \N$. Then
+  \begin{equation*}
+    \K_k(A,b) = \set{\pi(A): \pi \in P_{k-1}}
+  \end{equation*}
+\end{proposition}
+\begin{remark}
+  \label{rem:7.3}
+  $A \in \F^{n\times n}, b \in \F^n, x_0 \in \F^n, r_0 = b - Ax_0$ Consider $k \in \N_0$.
+
+  if $k=0$, let $\pi_k = 0 \in P_0$
+
+  if $k \in \N$, assume $\pi_k \in P_{k-1}$ is of degree $k-1$. Consider $x_k = x_0 + \pi_k(A) r_0$, we have
+  \begin{align*}
+    e_k &= x_k - x = \pi_k(A) r_0 - (x - x_0) \\
+    &= \pi_k(A) A (x - x_0) - (x-x_0) = -(I-\pi_k(A) A)(x-x_0) \\
+    &= q_k(A) e_0
+  \end{align*}
+  with $q_k \in P_k$ given by
+  \begin{equation*}
+    \tag{*}
+    \boxed{q_k(t) = 1 - \pi_k(t)t} \quad \forall t \in \F
+  \end{equation*}
+  (*) implies that $q_k(0) = 1$ and $\deg(q_k) = k$, i.e. $q_k \in Q_k$.
+
+  \textcolor{magenta}{
+    Choose $\pi_k \in P_{k-1} \setminus P_{k-2}\ \Longrightarrow$ get $q_k \in Q_k$.
+  }
+
+  If $q_k \in Q_k$, then $\pi_k \in P_{k-1}$ given by $\pi_k(t) = \frac{1}{t}(1-q_k(t))$ satisfies $\deg(\pi_k) = k-1$ and $e_k = q_k(A)e_0$ implies $x_k - x_0 = \pi_k(A) r_0$.
+\end{remark}
+\subsubsection*{Conjugate-gradient method}
+$A \in \F^{n\times n}$ Hermitian positive definite ($\F = \R$: symmetric) and $b, x_0 \in \F^n$. As $A$ is Hermitian positive definite, it induces an inner product
+\begin{equation*}
+  \iprod{u,v}_A:\ \F^n \times \F^n \rightarrow \F \quad \text{given by}
+\end{equation*}
+\begin{equation*}
+  \iprod{u,v}_A = u^* A v \quad \forall u, v \in \F^n
+\end{equation*}
+($\normempty_A= \sqrt{\iprod{\cdot,\cdot}_A}$ is the induced norm)
+
+\begin{mdframed}[linecolor=magenta, linewidth=1pt]
+  \textcolor{magenta}{\textbf{
+      The conjugate gradient method for $Ax = b$ starting at $x_0$ generates $(x_k)_{k \in \N}$ such that
+      \begin{align*}
+        y_k &= x_k - x_0 = \argmin_{y \in \K_k(A,r_0)} \norm{\underbrace{y - (x - x_0)}_{(x_0+y)-x}}_A \\
+        &= \underbrace{\prod_{A, \K_k(A,r_0)}}_{\text{orth. proj.}} (x - x_0)
+      \end{align*}
+      using an $A$-orthogonal basis for $\K_k(A,r_0)$.
+  }}
+\end{mdframed}
+\begin{lemma}
+  \label{lem:7.4}
+  Let $A \in \F^{n\times n}$ be Hermitian positive definite, $r_0 \in \F^n,\ k \in \N,\ y_k = \argmin_{y \in \K_k(A,r_0)}\norm{y - A^{-1}r_0}_A$ and $r_k = r_0 - Ay_k$. Then
+  \begin{equation*}
+    r_k \perp \K_k(A,r_0).
+  \end{equation*}
+\end{lemma}
+\begin{proof}
+  The optimality of $y_k$ is characterized by the $y_k \perp_A \K_k(A,r_0)$, i.e.
+  \begin{gather*}
+    A(y_k - A^{-1}r_0) \perp \K_k(A,r_0) \text{, i.e.}\\
+    r_k \perp \K_k(A,r_0)
+  \end{gather*}
+\end{proof}
+\begin{lemma}
+  \label{lem:7.5}
+  Let $n \in \N$, $A \in \F^{n\times n}$ be Hermitian positive definite, $r_0 \in \F^n, k \in \N_0, r_k \in \mathcal{K}_{k+1}(A,r_0)$ be non-zero and orthogonal to $\mathcal{K}_n(A,r_0)$. Let $p_{k+1} \in \mathcal{K}_{k+1}$ be non-zero and $A$-orthogonal to $\K_k(A,r_0)$. When $k \in \N$, assume additionaly that $p_k \in \K_k(A,r_0)$ is a non-zero vector $A$-orthogonal to $\K_{k-1}(A,r_0)$.
+
+  Let $\gamma_k = \frac{r_k^*p_{k+1}}{r_k^* r_k}$. Then $p_{k+1} = \gamma_k r_k$ if $k=0$ and $p_{k+1} = \gamma_k (r_k + \beta_k p_k)$ with $\beta_k = -\frac{p_k^* A r_k}{p_k^* A p_k}$ if $k \in \N$.
+\end{lemma}
+
+\begin{proof}
+  Since $\dim \K_{k+1}(A,r_0) \leq \dim \K_k(A,r_0) + 1$ and $r_k \in \K_{k+1}(A,r_0) \setminus \K_k(A,r_0)$, we have $\K_{k+1}(A,r_0) = \K_k(A,r_0) + \mathspan \set{r_k}$. When $k = 0$, this gives $\K_1(A,r_0) = \mathspan \set{r_0}$, so $p_1 \in \mathspan \set{r_0}$. Then the coefficient of $p_1$ along $r_0$ is $\gamma_0$, so $p_1 = \gamma_0 r_0$.
+
+  When $k \in \N$, we have $p_k \in \mathcal{K}_k(A,r_0) \setminus \mathcal{K}_{k-1}(A,r_0)$, so, since $\dim \K_k(A,r_0) \leq \dim \K_{k-1}(A,r_0) + 1$, we have $\K_k(A,r_0) = \K_{k-1}(A,r_0) + \mathspan \set{p_k}$. Then $\K_{k+1}(A,r_0) = \K_{k-1}(A,r_0) + \mathspan \set{r_k, p_k}$.
+
+  Due to $p_{k+1} \in \K_{k+1}(A,r_0)$, there exists $u_k \in \K_{k-1}(A,r_0),\ \mu_k, \nu_k \in \F$ such that $p_{k+1} = u_k + \mu_k r_k + \nu_k p_k$
+
+  Since $A \K_{k-1}(A,r_0) \subseteq \K_k(A,r_0)$, we have $r_k \perp_A \K_{k-1}(A,r_0)$ since $r_k \perp \K_k(A,r_0)$. Further, $p_k \perp_A \K_{k-1}(A,r_0)$. Finally, recall that $p_{k+1} \perp_A \K_k(A,r_0)$ and hence $p_{k+1} \perp_A \K_{k-1}(A,r_0)$.
+
+  This yields $u_k = p_{k+1} - \mu_k r_k - \nu_k p_k \perp_A \K_{k-1}(A,r_0)$, i.e., $u_k = 0$.
+
+  Project $p_{k+1}$ onto $p_k$ w.r.t. the $A$-inner product: using the $A$-orthogonality of $p_{k+1}$ to $\K_k(A,r_0)$, we optain $0 = p_k^* A p_{k+1} = \mu_k p_k^* A r_k + \nu_k p_k^* A p_k$.
+
+  Project $p_{k+1}$ onto $r_k$ w.r.t. the standard inner product: $r_k^* p_{k+1} = \mu_k r_k^* r_k$ because $r_k \perp \K_k(A,r_0)$, so $\mu_k = \gamma_k$ and $\nu_k = - \mu_k \frac{p_k^* A r_k}{p_k^* A p_k} = \gamma_k \beta_k$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:7.6}
+  Let $n \in \N,\ A \in \F^{n\times n}$ be Hermitian positive definite, $r_0 \in \F^n, k \in \N$
+  \begin{equation*}
+    y_i = \argmin_{y \in \K_i(A,r_0)} \norm{y - A^{-1} r_0}_A \text{ and } r_i = r_0 - A y_i \text{ for }i \in \set{k-1,k}
+  \end{equation*}
+  Let $p_k \in \K_k(A,r_0)$ be a non-zero vector $A$-orthogonal to $\K_{k-1}(A,r_0)$. Then $y_k = y_{k-1} + \alpha_k p_k$ with $\alpha_k = \frac{p_k^* r_{k-1}}{p_k^* A p_k}$
+\end{lemma}
+\begin{proof}
+  Since $\dim \K_k(A,r_0) \leq \dim \K_{k-1}(A,r_0) + 1$ and $p_k \in \K_k(A,r_0) \setminus \K_{k-1}(A,r_0)$, so $\dim \K_k(A,r_0) = \dim \K_{k-1}(A,r_0) + 1$ and hence $\K_k(A,r_0) = \K_{k-1}(A,r_0) \oplus_{\perp_A} \mathspan \set{p_k}$. Since $y_k, y_{k-1} $ are $A$-orthogonal projections of $A^{-1} r_0$ onto $\K_k$ and $\K_{k-1}$, we have $y_k = y_{k-1} + \alpha_k p_k$ with $\alpha_k = \frac{p_k^* A (A^{-1} r_0)}{p_k^* A p_k} = \frac{p_k^* r_0}{p_k^* A p_k}$.
+
+  Since $r_k \perp \K_k(A,r_0)$ (Lemma \ref{lem:7.4}) and $r_{k-1} = r_0 - A y_{k-1}$ and $A y_{k-1} \in A \K_{k-1}(A,r_0) \subseteq \K_k(A,r_0)$, we have that $p_k^* r_0 = p_k^* r_{k-1}$. So $\alpha_k = \frac{p_k^* r_{k-1}}{p_k^* A p_k}$.
+\end{proof}
+
+\begin{theorem}
+  Let $A \in \F^{n\times n}$ be Hermitian positive definite, $r_0 \in \F^n,\ m \in \N$ and set $r_k = r_0 - A y_k$ for any $k \in \set{1,\ldots, m}$ and $r_{k-1} \neq 0$. We also assume that $p_1,\ldots, p_m \in  \F^n$ be $A$-orthogonal and such that $p_k^* r_{k-1} = r_{k-1}^* r_{k-1}$ ($\gamma_{k-1} = 1$) and $p_1, \ldots, p_k$ is a basis for $\K_k(A,r_0)$. And $y_k = \argmin_{y \in \K_k(A,r_0)} \norm{y - A^{-1} r_0}_A$. Then
+  \begin{gather*}
+    y_k = y_{k-1} + \alpha_k p_k \text{ and } r_k = r_{k-1} - \alpha_k A p_k \text{ with } \alpha_k = \frac{r_{k-1}^* r_{k-1}}{p_k^* A p_k}\ \forall k \in \set{1,\ldots,m}\\
+    \text{and } p_{k+1} = r_k + \beta_k p_k \text{ with } \beta_k = \frac{r_k^* r_k}{r_{k-1}^* r_{k-1}}\ \forall k \in \set{1,\ldots,m-1}
+  \end{gather*}
+\end{theorem}
+\begin{proof}
+  By Lemma \ref{lem:7.6}, we have $y_k = y_{k-1} + \alpha_k p_k$ with $\alpha_k = \frac{p_k^* r_{k-1}}{p_k^* A p_k}$, so $\alpha_k = \frac{r_{k-1}^* r_{k-1}}{p_k^* A p_k}$ for any $k \in \set{1,\ldots,m}$. This implies $r_k = r_{k-1} - A (x_k - x_{k-1}) = r_{k-1} - \alpha_k A p_k \ \forall k \in \set{1,\ldots,m}$. Finally, for each $k \in \set{1,\ldots,m-1}$, by Lemma 7.5, we have $p_{k+1} = r_k + \beta_k p_k$ with $\beta_k = - \frac{p_k^* A r_k}{p_k^* A p_k}$. Since $r_{k-1} \neq 0$, we have $\alpha_k \neq 0$ and hence $A_{p_k} = \frac{1}{\alpha_k}(r_{k-1} - r_k)$. Then $r_k^* A p_k = \frac{1}{\alpha_k} (\underbrace{r_k^* r_{k-1}}_{\mathclap{=0\text{ since } r_k \perp \K_k}} - r_k^* r_k) = - \frac{1}{\alpha_k} r_k^* r_k$. So $\beta_k = \frac{r_k^* r_k}{p_k^* A p_k} \cdot \frac{1}{\overline{\alpha}_k} = \frac{r_k^*r_k}{p_k^*Ap_k} \cdot \frac{1}{\alpha_k} = \frac{r_k^* r_k}{r_{k-1}^* r_{ k-1 }}$.
+\end{proof}
+
+\begin{algorithm}[The conjugate gradient method]~\\
+  \label{alg:7.8}
+  Given: $A \in \F^{n\times n}$ Hermitian positive definite, $b \in \F^n$ and $x_0 \in \F^n$ s.t. $b-Ax_0 \neq 0$.
+
+  \noindent Initialize: set $r_0 = b - Ax_0$ and $p_1 = r_0$.
+
+  \noindent Iterate for $k = 1,2, \ldots$:
+
+  set $\alpha_k = \frac{r_{k-1}^* r_{k-1}}{p_k^* A p_k}$, set $x_k = x_{k-1} + \alpha_k p_k$
+
+  set $r_k = r_{k-1} - \alpha_k A p_k$
+
+  if $r_k$ is zero (or ``small''), then terminate
+
+  set $\beta_k = \frac{r_k^* r_k}{r_{k-1}^* r_{k-1}}$, set $p_{k+1} = r_k + \beta_k p_k$.
+\end{algorithm}
+\begin{remark*}
+  Only need to store $x_k,\ r_k,\ p_k$ (and $A p_k$ maybe) and compute  only one matrix-vector product $A p_k$ per iteration.
+\end{remark*}
+
+\stepcounter{lecture}
+\begin{remark}
+  \label{rem:8.1}
+  $A \in \F^{n\times n}$ Hermitian positive definite, $b,x_0 \in \F^n$ and $r_0 = b - Ax_0$. Let $k \in \N$ be such that $\dim \K_k(A,r_0) = k$. Then $\dim \K_j(A,r_0) = j$ for all $j \in \set{1,\ldots,k}$ The CG method produces $x_j$ with $j \in \set{1,\ldots,k}$. By Proposition \ref{prop:7.2} these are generated by polynomials $\pi_j \in P_{j-1} \setminus P_{j-2}$ ($P_0 = \set{0}, P_{-1}=\emptyset$) with $j \in \set{1,\ldots,k}$:
+
+  \begin{equation*}
+    x_j = x_0 + \pi_j(A) r_0 \quad \forall j \in \set{1,\ldots,k}
+  \end{equation*}
+  Let $\pi_0 = 0$, so that $x_j = x_0 + \pi_j(A) r_0$ holds also for $j=0$. Let $\sigma_j = \pi_j - \pi_{j-1}$. Then $\sigma_j \in P_{j-1} \setminus P_{j-2}$ and $x_j - x_{j-1} = \sigma_j(A) r_0$ for all $j \in \set{1,\ldots,k}$.
+\end{remark}
+
+The $A$-orthogonality of $p_1, \ldots, p_k$, due to
+\begin{equation*}
+  x_j - x_{j-1} = \alpha_j p_j\quad \forall j \in \set{1,\ldots,k},
+\end{equation*}
+is equivavalent to the orthogonality of of $\sigma_1, \ldots, \sigma_k$ w.r.t. to a suitable inner product.
+
+Indeed, let $\langle\cdot,\cdot\rangle: P_{k-1} \times P_{k-1} \rightarrow \F$ be given by $\langle u,v\rangle = (u(x)r_0)^* A (v(x)r_0)$.  This function is an inner product on $P_{k-1}$ ($A$ is Hermitian positive definite and ?). Then $p_i^* A p_j = \langle \sigma_i, \sigma_j \rangle \frac{1}{\alpha_i \alpha_j}\ \forall i,j \in \set{1,\ldots,k}$ and hence $\langle \sigma_i, \sigma_j \rangle = 0\ \forall i,j \in \set{1,\ldots,k}$ such that $i \neq j$.
+
+The inner product $\langle \cdot, \cdot \rangle$ is an $L^2$ inner product on $P_{k-1}$ w.r.t. to a suitable Stieltjes measure.
+
+Consider a spectral decomposition of $A$: $A = Q \Lambda Q^T$ with $Q \in \F^{n\times n}$ unitary and $\Lambda \in \F^{n\times n}$ diagonal. Let $W = Q^* r_0$. Then
+\begin{align*}
+  \langle u, v \rangle &= (u(A) r_0)^* A (v(A) r_0) = (Qu(\Lambda)Q^* r_0)^* Q \Lambda Q^* (Qv(\Lambda)Q^*r_0) \\
+  &= (u(\Lambda)W)^* \Lambda (v(\Lambda)W) = \sum_{i=1}^n \abs{w_i}^2 \lambda_i u(\lambda_i) \\
+  &= \int_\R u(t)v(t) d\Theta(t) = \iprod{u,v}_{L^2_\Theta(\R)}
+\end{align*}
+where
+\begin{equation*}
+  \Theta = \sum_{i=1}^n \lambda_i \abs{w_i}^2 \Theta_{\lambda_i}
+\end{equation*}
+Here, for any $\lambda \in \R$, $\Theta_\lambda: \R \rightarrow \R$ is the Heaviside function jumping at $\lambda$:
+\begin{equation*}
+  \Theta_\lambda(t) =
+  \begin{cases}
+    1, & t \geq \lambda \\
+    0, & t < \lambda
+  \end{cases}
+  \quad \forall t \in \R
+\end{equation*}
+
+In terms of generalized functions: $\Theta'_\lambda = \delta_\lambda\ \forall \lambda \in \R$, so that
+\begin{equation*}
+  d\Theta(t) = \sum_{i=1}^n \lambda_i \abs{w_i}^2 \delta_{\lambda_i}(t) dt
+\end{equation*}
+For a system $\set{\sigma_j}_{j=0}^{\infty}$ of polynomials ($\sigma_j \in P_j$ of degree $j\ \forall j \in \N_0$), orthogonality w.r.t. a Stieltjes measure is a equivalent to a theree-term recurrence relation: $\exists\ \set{\xi_j}_{j\in \N},\ \set{\eta_j}_{j\in \N},\ \set{\zeta_j}_{j\in \N}$ such that
+
+\begin{equation*}
+  \sigma_{j+1}(t) = (\xi_{j+1} + \eta_{j+1} t) \sigma_j(t) + \zeta_{j+1} \sigma_{j-1}(t) \quad \forall t \in \R,\ j \in \N
+\end{equation*}
+The coefficients correspond to the inner product.
+\begin{example*}
+  \begin{itemize}
+    \item Chebyshev polynomials:
+      \begin{equation*}
+        T_{j+1}(t) = 2t T_j(t) - T_{j-1}(t) \quad \forall t \in \R,\ j \in \N
+      \end{equation*}
+      $(T_j)_{j=0}^{k-1}$ are orthogonal w.r.t. $\int_{-1}^1 u(t)v(t) \frac{dt}{\sqrt{1-t^2}} \quad \forall u,v \in P_{k-1}$.
+
+    \item Legendre polynomials:
+      \begin{equation*}
+        (j+1) P_{j+1}(t) = (2j + 1) t P_j(t) - j P_{j-1}(t) \quad \forall t \in \R,\ j \in \N
+      \end{equation*}
+      $(P_j)_{j=0}^{k-1}$ are orthogonal w.r.t. $\int_{-1}^1 u(t)v(t) dt \quad \forall u,v \in P_{k-1}$.
+  \end{itemize}
+\end{example*}
+\addtocounter{theorem}{-1}
+\begin{lemma}[A]
+  Let $A \in \F^{n\times n}$ be invertible, $r_0 \in \F^n$ be non-zero.
+
+  Let $m = \max_{k \in \N} \dim \K_k(A,r_0) \in \N$. Then
+  \begin{enumerate}[label=(\roman*)]
+    \item $\dim \K_k(A,r_0) = \min\set{k,m}\ \forall k \in \N$
+    \item $A^{-1} r_0 \in \K_m(A,r_0) \setminus \K_{m-1}(A,r_0)$.
+  \end{enumerate}
+\end{lemma}
+\begin{proof}
+
+  \begin{enumerate}[label=(\roman*)]
+    \item Since $r_0 \neq 0$, we have $\dim\K_1(A,r_0) = \dim \mathspan \set{r_0} = 1$, so that $\dim \K_1(A,r_0) = \dim \K_0(A,r_0) + 1$. Let $\mathcal{M}=\set{k \in \N:\ \dim \K_k (A,r_0) = \dim \K_{k-1}(A,r_0) + 1}$.
+
+      Note: $1 \in \mathcal{M}$ and $\mathcal{M}$ is bounded because $\dim \K_k(A,r_0) \leq n$.
+
+      Let $\tilde{m} = \max\mathcal{M}$. Then $\mathcal{M} = \set{1,\ldots,\tilde{m}}$! Indeed, for $k \in \set{1, \ldots, \tilde{m}}$, we had $k \notin \mathcal{M}$, we would have $\K_j(A,r_0) = \K_k(A,r_0)$ for all $j \in \N$ such that $j \geq k$, hence $\tilde{m} \notin \mathcal{M}$. So $\dim \K_k(A,r_0) = k\ \forall k \in \set{1,\ldots,\tilde{m}}$.
+
+      On the other hand, $\dim \K_k(A,r_0) = \dim \K_{\tilde{m}}(A,r_0)\ \forall k \in \N$ such that $k \geq \tilde{m}$. Then $m = \tilde{m}$ and $\dim \K_k(A,r_0) =  \min\set{k, \tilde{m}}\ \forall k \in \N$.
+
+    \item Since $\K_{m+1}(A,r_0) = \K_m(A,r_0)$, we have $A^m r_0 \in \K_m(A,r_0)$. Due to $r_0 \neq 0$, this means $A^m r_0 = \sum_{k=\ell}^m c_k A^{k-1} r_0$ for some $\ell \in \set{0,\ldots,m}$ and $c_{\ell}, \ldots, c_m \in \F$ s.t. $c_\ell \neq 0$. Then
+      \begin{align*}
+        A^{-1} r_0  &= A^{-\ell} (A^{\ell-1}r_0 ) = A^{-\ell} \frac{1}{c_\ell} (A^m r_0 - \sum_{k=\ell+1}^m c_k A^{k-1} r_0)\\
+        &= \frac{1}{c_\ell} A^{m-\ell} r_0 - \frac{1}{c_\ell} \sum_{k=\ell+1}^m c_k A^{k-\ell-1} r_0\\
+        \Rightarrow A^{-1} r_0 &\in \K_m(A,r_0)
+      \end{align*}
+
+      proven: $A^{-1} r_0 \in \K_m(A,r_0)$. Further, let us consider $\tilde{m} = \min\set{k\in \N:\ A^{-1} r_0 \in \K_k(A,r_0)}$ ($A^{-1} r_0 \in \K_{\tilde{m}}(A,r_0) \setminus \K_{\tilde{m}-1}(A,r_0)$). The set is nonempty ($m$ is in the set), so $\tilde{m} \in \set{1,\ldots,m}$.
+
+      It remains to show that $\tilde{m} = m$: $\dim \K_{\tilde{m}}(A,r_0) \leq \dim \K_{\tilde{m}-1}(A,r_0) + 1$, so $\dim \K_{\tilde{m}}(A,r_0) = \mathspan \set{A^{-1} r_0} + \K_{\tilde{m}-1}(A,r_0)$.
+
+      \begin{align*}
+        \Rightarrow A \K_{\tilde{m}}(A,r_0) &= A \K_{\tilde{m}-1}(A,r_0) + \mathspan \set{r_0}\\
+        &\subseteq \K_{\tilde{m}}(A,r_0) + \K_{\tilde{m}}(A,r_0) = \K_{\tilde{m}}(A,r_0)
+      \end{align*}
+
+      So $\K_{\tilde{m}+1}(A,r_0) = \K_{\tilde{m}}(A,r_0)$ and hence $\K_{m}(A,r_0) = \K_{\tilde{m}}(A,r_0)\ \forall k \in \N$ such that $k \geq \tilde{m}$. This means $\tilde{m} = m$.
+  \end{enumerate}
+\end{proof}
+
+\addtocounter{theorem}{-1}
+\begin{lemma}[B]
+  Let $A \in \F^{n\times n}$ be diagonalizable, $A=S \Lambda S^{-1}$ be an eigenvalue decomposition of $A$ ($\Lambda = \diag(\lambda_1,\ldots,\lambda_n)$). Let $r_0 \in \F^n,\ \omega \in S^{-1} r_0$. Assume that $\dim \K_k (A,r_0) = k$ for some $k \in \N$. Then
+  \begin{equation*}
+    \#\,\set{\lambda_i \mid i \in \set{1,\ldots,n}, \omega_i \neq 0} \geq k
+  \end{equation*}
+  (Note: $S^{-1} e_0 = S^{-1} (x_0 - x)= -S^{-1}A^{-1} r_0=-\Lambda^{-1} \omega$ (if $A$ is invertible))
+\end{lemma}
+\begin{proof}
+  Note that $\K_k(A,r_0) = S \K_k(\Lambda,\omega)$ and hence $\dim \K_k(\Lambda,\omega) = k$ since $S$ is invertible. So
+  \begin{equation*}
+    \dim \K_k(\Lambda,\omega) = \rank
+    \begin{pmatrix}
+      \omega_1 & \lambda_1 \omega_1 & \lambda_1^2 \omega_1 & \cdots & \lambda_1^{k-1} \omega_1\\
+      \vdots & \vdots & \vdots & \cdots & \vdots\\
+      \omega_n & \lambda_n \omega_n & \lambda_n^2 \omega_n & \cdots & \lambda_n^{k-1} \omega_n
+    \end{pmatrix}
+    = k
+  \end{equation*}
+  $\Rightarrow\ \exists i_1, \ldots, i_k \in \set{1,\ldots,n}$ distinct such that the matrix
+  \begin{equation*}
+    \begin{pmatrix}
+      \omega_{i_1} & \lambda_{i_1} \omega_{i_1} & \lambda_{i_1}^2 \omega_{i_1} & \cdots & \lambda_{i_1}^{k-1} \omega_{i_1}\\
+      \vdots & \vdots & \vdots & \cdots & \vdots\\
+      \omega_{i_k} & \lambda_{i_k} \omega_{i_k} & \lambda_{i_k}^2 \omega_{i_k} & \cdots & \lambda_{i_k}^{k-1} \omega_{i_k}
+    \end{pmatrix}
+  \end{equation*}
+  is non-singular. Then $\omega_{i_1}, \ldots, \omega_{i_k}$ are all non-zero and $\lambda_{i_1}, \ldots, \lambda_{i_k}$ are distinct.
+\end{proof}
+\begin{remark}[in the notations of Remark \ref{rem:8.1}]
+  \label{rem:8.2}
+  Consider $j \in \set{2,\ldots, k-1}$, then $p_{j+1}= r_j + \beta_j p_j$ and $p_j = r_{j-1} + \beta_{j-1} p_{j-1}$, where $r_j = r_{j-1} - \alpha_j A p_j$. Expressing $r_j = p_{j+1} - \beta_j p_j,\ r_{j-1} = p_j - \beta_{j-1} p_{j-1}$ and substituting those expressions into the recurrence for residuals, we obtain:
+  \begin{equation*}
+    \tag{*}
+    p_{j+1} - \beta_j p_j = p_j - \beta_{j-1} p_{j-1} - \alpha_j A p_j.
+  \end{equation*}
+  Since $p_i = \frac{1}{\alpha_i} \sigma_i (A) r_0$ for all $i \in \set{0, \ldots, k}$, where we set $\alpha = 0$ for convenience, (*) gives us $\frac{1}{\alpha_{j+1}} \sigma_{j+1}(A) r_j$
+  \TODO[There is some error, find correct remark]
+\end{remark}
+\addtocounter{theorem}{-1}
+\begin{lemma}[A]
+  \label{lem:8.2}
+  Let $A \in \F^{n\times n}$ be Hermitian positive definite. Assume that $\spectrum{A} \subseteq [\lambda, \Lambda]$ for some $\lambda, \Lambda \in \R$ with $0 < \lambda < \Lambda$. Consider
+  \begin{equation*}
+    \phi:\ \F \rightarrow \F, \text{ given by } \phi(t) = -\frac{2t-(\Lambda + \lambda)}{\Lambda - \lambda} \quad \forall t \in \F
+  \end{equation*}
+  and set $\tau = \frac{\Lambda + \lambda}{\Lambda - \lambda}$. Then for each $k \in \N$, $q_k = \frac{T_k \circ \phi}{T_k(\tau)}$, where $T_k$ is the degree $k$ Chebyshev polynomial of the first kind, satisfies $q_k \in Q_k$ ($q_k \in P_k$ and $q_k(0) = 1$) and $\norm{q_k(A)}_2 \leq 2 (\frac{\sqrt{a}-1}{\sqrt{a}+1})^k$, where $a = \frac{\Lambda}{\lambda} \geq \cond_2(A)$.
+\end{lemma}
+\TODO[Proof]
+\begin{theorem}
+  Let $A \in \F^{n\times n}$ be Hermitian positive definite, $b, x_0 \in \F^n$ and $r_0 = b - Ax_0$. Then for each $k \in \N$, the k-th CG-iteration for $Ax = b$ and initial guess $x_0$, $x_k = x_0 + \argmin_{y \in \K_k(A,r_0)} \norm{y - A^{-1} r_0}_A$, satisfies
+  \begin{equation*}
+    \norm{x_k - x}_A \leq 2 \left(\frac{\sqrt{a}-1}{\sqrt{a}+1}\right)^k \norm{x_0 - x}_A,
+  \end{equation*}
+  $\text{ where } a = \frac{\Lambda}{\lambda} \text{ and } \spectrum{A} \subseteq [\lambda, \Lambda] \text{ for } 0 < \lambda < \Lambda$.
+\end{theorem}
+\begin{proof}
+  Due to the optimality of $x_k$, we have
+  \begin{equation*}
+    \norm{x_k - x}_A = \norm{(x_k - x_0) + (x_0 - x)}_A \leq \norm{y_k - A^{-1} r_0}_A \quad \forall y_k \in \K_k(A,r_0)
+  \end{equation*}
+  $q_k$ be given as in Lemma \ref{lem:8.2} and $\pi_k \in P_{k-1}$ be given by
+  \begin{equation*}
+    \pi_k(t) = \frac{1}{t} (1 - q_k(t)) \quad \forall t \in \F \quad \text{(see Remark \ref{rem:7.3})}
+  \end{equation*}
+  Then $\pi_k(A)r_0 \in \K_k(A,r_0)$ by Proposition \ref{prop:7.2}. So
+  \begin{align*}
+    \norm{x_k - x}_A &\leq \norm{\pi_k(A) r_0 - A^{-1} r_0}_A = \norm{A^{-1} r_0 - A^{-1} q_k(A) r_0}_A \\
+    &\leq \norm{q_k(A)}_2 \norm{x-x_0}_A \leq 2 \left(\frac{\sqrt{a}-1}{\sqrt{a}+1}\right)^k \norm{x-x_0}_A \quad \forall k \in \N
+  \end{align*}
+\end{proof}
+\begin{remark*}
+  Improvement over gradient descent:
+
+  Instead of $( \frac{a-1}{a+1} )^k $, we have $( \frac{\sqrt{a}-1}{\sqrt{a}+1} )^k $.
+\end{remark*}
+\subsubsection*{Preconditioned CG-iteration}
+Our assumptions: $k \in \N,\ A \in \F^{n\times n}$ Hermitian positive definite, $\lambda,\Lambda$ - spectral bounds, maybe unfavorable
+\begin{example*}
+  \begin{equation*}
+    A =
+    \begin{pmatrix}
+      2  & -1 &&\\
+      -1 & \ddots & \ddots & \\
+      & \ddots & \ddots &-1 \\
+      & & -1 & 2
+    \end{pmatrix}
+    ,\quad \kappa = \frac{\Lambda}{\lambda} \sim n^2
+  \end{equation*}
+  $Ax = b$, $P$ (invertible) as preconditioner $\rightsquigarrow P^{-1} A x = P^{-1} b$.
+
+  Problem: $P^{-1} A$ might not be Hermitian positive definite.
+
+  Let us assume $P$ is Hermitian positive definite ($P^{-1}$ is so as well, so it has a Cholesky decomposition) and $C \in \F^{n\times n}$ is non-singular such that $P^{-1} = CC^*$.
+
+  Or: Take $(P^{-1})^{1/2}$, the HPD square root
+
+  Then $Ax = b \Rightarrow \underbrace{C^* A C (C^{-1} x) = C^* b}_{\mathclap{\text{symmetric two-sided preconditioning}}} \rightsquigarrow \tilde{A} \tilde{x} = \tilde{b}$
+
+  If $\tilde{x}$ solves the preconditioned system, $x = C \tilde{x}$ solves the original system.
+  \begin{equation*}
+    \norm{C \tilde{x}_k - x} = \norm{C(\tilde{x}_k - \tilde{x})} \leq \norm{C} \norm{\tilde{x}_k - \tilde{x}}
+  \end{equation*}
+  Easy to check: $\tilde{A}$ is Hermitian positive definite (check $x^*\tilde{A}x > 0$ and $\tilde{A}^* = \tilde{A}$), so we can apply the CG method to $\tilde{A} \tilde{x} = \tilde{b}$.
+  \begin{enumerate}[label=(\roman*)]
+    \item accuracy: If $\tilde{x}_k$ is an approximation of $\tilde{x}$, then $x_k = C \tilde{x}_k$ satisfies
+      \begin{equation*}
+        \norm{x_k - x}_A = \sqrt{(\tilde{x}_k - \tilde{x})^* C^* A C (\tilde{x}_k - \tilde{x})} = \norm{\tilde{x}_k - \tilde{x}}_{\tilde{A}}
+      \end{equation*}
+      So the CG method for the preconditioned system minimizes also the $A$-norm of the error of the initial system.
+    \item conditioning: $\cond_2 \tilde{A} = \cond_2 P^{-1} A$ by the following result
+  \end{enumerate}
+\end{example*}
+\stepcounter{lecture}
+\begin{proposition}
+  Let $A \in \F^{n\times n}$ be Hermitian non-singular and $C \in \F^{n\times n}$ be non-singular. Then
+  \begin{equation*}
+    \cond_2 C^* A C \leq \cond_2 C C^* A
+  \end{equation*}
+\end{proposition}
+\begin{proof}
+  Let $P = (CC^*)^{-1},\ \tilde{A} = C^* A C$ and $B = P^{-1} A$. For each $k \in \N$, we have
+  \begin{equation*}
+    \tilde{A}^k = C^{-1} (CC^*A)^k C = C^{-1} B^k C \text{ and } \norm{\tilde{A}^{-1}}^k_2 = \norm{\tilde{A}^{-k}}_2 \quad \forall k \in \N
+  \end{equation*}
+  Then
+  \begin{equation*}
+    \norm{\tilde{A}}_2^k = \norm{\tilde{A}^k}_2 \leq \norm{C^{-1}}_2\norm{C}_2 \norm{B}_2^k\text{ and }\norm{\tilde{A}^{-1}}_2^k = \norm{\tilde{A}^{-k}}_2 \leq \norm{C^{-1}}_2\norm{C}_2 \norm{B^{-1}}_2^k.
+  \end{equation*}
+  Taking the $k$-th root and passing to $k \rightarrow \infty$, we get $\norm{\tilde{A}}_2 \leq \norm{B}_2$ and $\norm{\tilde{A}^{-1}}_2 \leq \norm{B^{-1}}_2$. So
+  \begin{equation*}
+    \cond_2 \tilde{A} \leq \cond_2 B
+  \end{equation*}
+\end{proof}
+\begin{proposition}
+  Let $A \in \F^{n\times n}$ be HPD, $R \in \F^{n\times n}$ be Hermitian such that $\rho(I-RA) < 1$. Then $R$ is positive definite and, if $R = CC^*$ for some $C \in \F^{n\times n}$, then $\tilde{A} = C^* A C$ satisfies
+  \begin{equation*}
+    \lambda_{\max}(\tilde{A})\leq 1 + \rho,\ \lambda_{\min}(\tilde{A}) \geq 1 - \rho \quad (\Rightarrow \cond_2 \tilde{A} = \frac{\lambda_{\max}}{\lambda_{\min}} \leq \frac{1+\rho}{1-\rho})
+  \end{equation*}
+  \begin{proof}
+    Let $U \in \F^{n\times n}$ be non-singular such that $A = UU^*$ (e.g. the Cholesky factor of $A$). Then $I - U^*RU = U^*(I-RA)U^{-*}$. So $\rho(I-U^*RU) = \rho(I-RA) < 1$
+
+    $U^*RU$ is Hermitian $\rightarrow\ \spectrum{U^*RU} \subset \R$ and hence $\spectrum{U^*RU} \subset [1-\rho, 1+\rho] \subset (0,2)$, where $\rho = \rho(I-RA)$. So $U^*RU$ is positive definitem so $R$ is as well. Let $C \in \F^{n\times n}$ be such that $R - CC^*$ then $\rho(I-\tilde{A}) = \rho(I-C^*A C) = \rho(I - RA) =\rho$. Since $\tilde{A}$ is Hermitian, this implies $\spectrum{\tilde{A}} \subset [1-\rho, 1+\rho]$.
+  \end{proof}
+\end{proposition}
+\begin{remark*}[Reformulation of CG algorithm for $\tilde{A} \tilde{x} = \tilde{b}$]
+  We consider $P \in \F^{n\times n}$ Hermitian positive definite such that $P^{-1} = CC^*$. For $x_0$ (Initial guess), we set $r_0 = b-Ax_0,\ \tilde{x_0} = C^{-1} x_0.$ Algorithm \ref{alg:7.8} for $\tilde{A} \tilde{x} = \tilde{b}$ starting at $\tilde{x_0}$:
+  \begin{equation*}
+    \tilde{r}_0 = \tilde{b} - \tilde{A} \tilde{x_0},\ \tilde{p}_1 = \tilde{r}_0
+  \end{equation*}
+  Note that $\tilde{r}_0 = C^*b - C^*A C C^{-1} x_0 = C^* r_0$. For $k \in \N$, the $k$-th iteration takes the form:
+  \begin{align*}
+    \tilde{\alpha}_k &= \frac{\tilde{r}_{k-1}^* \tilde{r}_{k-1}}{\tilde{p}_k^* \tilde{A} \tilde{p}_k}\\
+    \tilde{x_k} &= \tilde{x}_{k-1} + \tilde{\alpha}_k \tilde{p}_k\\
+    \tilde{r_k} &= \tilde{r}_{k-1} - \tilde{\alpha}_k \tilde{A} \tilde{p}_k \quad (\tilde{r}_k = 0 \rightarrow \text{ terminate})\\
+    \tilde{\beta}_k &= \frac{\tilde{r}_k^* \tilde{r}_k}{\tilde{r}_{k-1}^* \tilde{r}_{k-1}}\\
+    \tilde{p}_{k+1} &= \tilde{r}_k + \tilde{\beta}_k \tilde{p}_k
+  \end{align*}
+  First,
+  \begin{align*}
+    \tilde{\alpha}_k &= \frac{\tilde{r}_{k-1}^* C^{-1} \overbrace{C C^*}^{P^{-1}} C^{-*} \tilde{r}_{k-1}}{\tilde{p}_k^* C^* A C \tilde{p}_k} = \frac{(C^{-*}\tilde{r}_{k-1})^*P^{-1}(C^{-*}\tilde{r}_{k-1})}{(C \tilde{p}_k)^* A (C \tilde{p}_k)} =
+  \end{align*}
+\end{remark*}
 \end{document}
