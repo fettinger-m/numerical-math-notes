@@ -47,7 +47,7 @@
 \newcommand{\normempty}{\|\cdot\|}
 \newcommand{\spectrum}[1]{\bm{\lambda}(#1)}
 
-\newcommand{\TODO}[1][]{\textcolor{red}{\textbf{TODO\ifblank{#1}{}{:\ }#1} }}
+\newcommand{\TODO}[1][]{\textcolor{red}{\textbf{TODO\ifblank{#1}{}{:\ }#1}}\\}
 \newcommand{\blockHorizontal}[2]{
   \left[
     \begin{array}{c|c}
@@ -717,7 +717,7 @@ Since $A$ is SPD the function $\normempty_A:\ \R^n \rightarrow \R$ given by $\no
   J(x+e) - J(x) = \frac{1}{2} \norm{e}_A^2
 \end{equation*}
 
-\subsubsection*{Gradient-type methods for systems with SPD matrices.}
+\subsection{Gradient-type methods for systems with SPD matrices.}
 
 Solve $Ax = b$, $b \in \R^n$ with $A \in \R^{n\times n}$ SPD and $x_0 \in \R^n$ an initial guess. The gradient descent method is given by
 \begin{equation*}
@@ -791,31 +791,14 @@ The optimal value of $\alpha_k$ is given by
   \TODO[]
 \end{proof}
 
-\emph{I dont really know how to put the following things in the notes.}
-
-\begin{mdframed}
-  Gradient descent with $\alpha_n$ optimal for the given extreme eigenvalues.
-\end{mdframed}
-vs
-
-\begin{mdframed}
-  Steepest gradient descent with $\alpha_k = \frac{\norm{r_{k-1}}_2^2}{\norm{r_{k-1}}_A^2}$
-\end{mdframed}
-Richardson iteration: $x_k = x_{k-1} + \alpha_k r_{k-1}$,
-
-Start $x_0 \in \F^n$
-
-$r_k = b - Ax_k$
-
-$\alpha_k$ are relaxation parameters.
-
-\vspace{\topsep}
-Let $\mathcal{K}_k = \mathcal{K}_k(A, r_0) = \textnormal{span}\set{A_j r_0}_{j=0}^{k-1} = \textnormal{span} \set{r_0, A r_0, \ldots, A^{k-1} r_0}$. Obviously $\mathcal{K}_k \subseteq \mathcal{K}_{k+1} \forall k \in \N$.
+\subsection{Krylov subspaces}
+Let $\mathcal{K}_k = \mathcal{K}_k(A, r_0) = \textnormal{span}\set{A_j r_0}_{j=0}^{k-1} = \textnormal{span} \set{r_0, A r_0, \ldots, A^{k-1} r_0}$. Obviously $\mathcal{K}_k \subseteq \mathcal{K}_{k+1}\  \forall k \in \N$.
 \begin{remark}
   $r_{k-1} \in \mathcal{K}_k$ and $x_k - x_0 \in \mathcal{K}_k \quad \forall k \in \N$.
-
-  \TODO[Proof]
 \end{remark}
+\begin{proof}
+  \TODO
+\end{proof}
 \begin{remark}
   At step $k$, we, update the current iterate along the current residual, $x_{k-1} - x_0 \in \mathcal{K}_{k-1}$, $x_k - x_{k-1} \in \mathnormal{span}\set{r_{k-1}}$. So $\mathcal{K}_k = \mathcal{K}_{k-1} + \textnormal{span}\set{r_{k-1}} \quad \forall k \in \N$.
 \end{remark}
@@ -909,7 +892,7 @@ Let $\mathcal{K}_k = \mathcal{K}_k(A, r_0) = \textnormal{span}\set{A_j r_0}_{j=0
 
   If $q_k \in Q_k$, then $\pi_k \in P_{k-1}$ given by $\pi_k(t) = \frac{1}{t}(1-q_k(t))$ satisfies $\deg(\pi_k) = k-1$ and $e_k = q_k(A)e_0$ implies $x_k - x_0 = \pi_k(A) r_0$.
 \end{remark}
-\subsubsection*{Conjugate-gradient method}
+\subsection{Conjugate-gradient method}
 $A \in \F^{n\times n}$ Hermitian positive definite ($\F = \R$: symmetric) and $b, x_0 \in \F^n$. As $A$ is Hermitian positive definite, it induces an inner product
 \begin{equation*}
   \iprod{u,v}_A:\ \F^n \times \F^n \rightarrow \F \quad \text{given by}
@@ -1194,7 +1177,7 @@ The coefficients correspond to the inner product.
 
   Instead of $( \frac{a-1}{a+1} )^k $, we have $( \frac{\sqrt{a}-1}{\sqrt{a}+1} )^k $.
 \end{remark*}
-\subsubsection*{Preconditioned CG-iteration}
+\subsection{Preconditioned CG-iteration}
 Our assumptions: $k \in \N,\ A \in \F^{n\times n}$ Hermitian positive definite, $\lambda,\Lambda$ - spectral bounds, maybe unfavorable
 \begin{example*}
   \begin{equation*}
@@ -1286,11 +1269,10 @@ Our assumptions: $k \in \N,\ A \in \F^{n\times n}$ Hermitian positive definite, 
   \textcolor{red}{($\rightarrow\ r_k = b - Ax_k$ holds)}
 
   \TODO[Ask about the $\tilde{x_k}$ definition. Kazeev did write $\tilde{p}_{k-1}$ instead of $\tilde{p}_k$]
-  \begin{equation*}
-    \color{red}
-    \tilde{\alpha}_k = \frac{r_{k-1}^* P^{-1} r_{k-1}}{p_k^* A p_k} \quad \text{ and } \quad \tilde{\beta}_k = \frac{r_k^* P^{-1} r_k}{r_{k-1}^* P^{-1} r_{k-1}}
-  \end{equation*}
-  \textcolor{red}{
+  \begin{mdframed}
+    \begin{equation*}
+      \tilde{\alpha}_k = \frac{r_{k-1}^* P^{-1} r_{k-1}}{p_k^* A p_k} \quad \text{ and } \quad \tilde{\beta}_k = \frac{r_k^* P^{-1} r_k}{r_{k-1}^* P^{-1} r_{k-1}}
+    \end{equation*}
     We can evaluate
     \begin{equation*}
       z_0 = P^{-1} r_0, \quad v_1 = C \tilde{p}_1 = C \tilde{r}_0 = P^{-1} r_0 = z_0.
@@ -1299,7 +1281,7 @@ Our assumptions: $k \in \N,\ A \in \F^{n\times n}$ Hermitian positive definite, 
     \begin{equation*}
       z_k = P^{-1} r_k \quad \text{ and } \quad v_{k+1} = C \tilde{p}_{k+1}
     \end{equation*}
-  }
+  \end{mdframed}
 \end{remark*}
 \begin{algorithm}[The preconditioned CG method, PCG]~\\[\parskip]
   \label{alg:9.3}
