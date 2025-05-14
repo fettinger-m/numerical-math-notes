@@ -43,6 +43,7 @@
 \newcommand{\C}{\mathbb{C}}
 \newcommand{\N}{\mathbb{N}}
 \newcommand{\K}{\mathcal{K}}
+\newcommand{\bigast}{\textbf{\textasteriskcentered}}
 \renewcommand{\Re}{\textnormal{Re}}
 \newcommand{\normempty}{\|\cdot\|}
 \newcommand{\spectrum}[1]{\bm{\lambda}(#1)}
@@ -93,7 +94,7 @@
 \maketitle
 \section{Linear algebra}
 \stepcounter{lecture}
-\subsection{Vectors and matrices}
+\subsection*{Vectors and matrices}
 In this section the field $\F$ is $\R$ or $\C$. $m$ and $n$ always denote natural numbers.
 
 \begin{definition}
@@ -197,7 +198,7 @@ In this section the field $\F$ is $\R$ or $\C$. $m$ and $n$ always denote natura
   $U\in \F^{n \times n}$ invertible and $\normempty$ a norm on $\F^{n \times n}$. Consider $\normempty_*, \normempty_{**}, \normempty_{***}:\ \F^{n \times n} \rightarrow \R$ given by $\norm{A}_* = \norm{UA},\ \norm{A}_{**} = \norm{AU},\ \norm{A}_{***} = \norm{U^{-1}AU}$. These 3 functions are norms on $\F^{n \times n}$ and they are consistent if $\normempty$ is consistent.
 \end{proposition}
 
-\subsection{Eigenvalues of matrices}
+\subsection*{Eigenvalues of matrices}
 \begin{definition}
   $A \in F^{n \times n}, \lambda \in \F$. If $\ker(A - \lambda I) \neq \{0\}$ then $\lambda$ is called an eigenvalue of $A$ and every non-zero vector from $\ker(A - \lambda I)$ is called an eigenvector of $A$ associated with the eigenvalue $\lambda$.
 \end{definition}
@@ -225,7 +226,7 @@ In this section the field $\F$ is $\R$ or $\C$. $m$ and $n$ always denote natura
   If $A \in \F^{n \times n}$ is a Jordan block of size $n \geq 2$, then there is only one eigenvalue, $\lambda=1$, with algebraic multiplicity $n$ and geometric multiplicity $\dim(\ker(A-I)) = 1<n$. So $\lambda=1$ is a defective eigenvalue of $A$.
 \end{example*}
 
-\subsection{Schur canonical form}
+\subsection*{Schur canonical form}
 \begin{definition}
   $A\in \C^{n\times n}$. Assume that $Q \in \C^{n\times n}$ is unitary and that $T= Q^*AQ$ (which is equivalent to $A = QTQ^*$) is upper triangular. Then the factorization $A = QTQ^*$ is called a Schur decomposition of $A$ and $T$ is called a \emph{Schur canonical form}.
 \end{definition}
@@ -304,7 +305,7 @@ In this section the field $\F$ is $\R$ or $\C$. $m$ and $n$ always denote natura
   So the Schur form is a generalization of diagonalization by unitary similarity transformations for normal matrices to abitrary matrices.
 \end{remark}
 
-\subsection{Spectral radius of a matrix: The behavior of matrix powers}
+\subsection*{Spectral radius of a matrix: The behavior of matrix powers}
 
 \begin{definition}
   For $A \in \F^{n \times n}$ the set of eigenvalues of $A$ is called the \emph{spectrum} of $A$. We will denote the spectrum of $A$ by $\spectrum{A}$. (i.e., $\spectrum{A}$ is the zero set of $\chi_A$).
@@ -472,7 +473,7 @@ Iterative methods (in contrast to direct methods) perform a sequence of computat
 
 $k \in \N$ will denote the iteration index. An iterative method produces iterates $(x_1,x_2,\ldots) = (x_k)_{k \in \N}$ from an \emph{initial guess} (initial approximation) $x_0 \in \F^n$. We are interested in the errors $e_k = x_k - x \in \F^n$. So the above question is how $\norm{e_k}$ behaves w.r.t. $k\in \N$, where $\normempty$ is a norm on $\F^n$.
 
-\subsection{Linear iterative methods}
+\subsection*{Linear iterative methods}
 $e_k = T_k \cdot e_{k-1}$ for all $k \in \N$, where $T_k \in \F^{n \times n}$ is the \emph{iteration matrix} at iteration $k$. For some methods we have $T_k = T$ for all $k \in \N$, where $T \in \F^{n \times n}$ -- those are \emph{stationary methods}.
 
 Let $A_1, A_2 \in \F^{n \times n}$ be such that $A=A_1 + A_2$. Then the linear system $Ax = b$ can be rewritten as
@@ -571,7 +572,7 @@ where $r_{k-1} = b - Ax_{k-1} = Ae_{k-1}$ is the \emph{residual vector} at step 
   If $\norm{B_k} \leq \rho$ for all $k \in \N$ and for some $\rho \in (0,1)$ and a norm $\normempty$ on $\F^n$, then this yields the exponential convergence of the iterates $(x_k)_{k \in \N}$ to the exact solution $x$.
 \end{mdframed}
 
-\subsection{Stationary linear iterative schemes}
+\subsection*{Stationary linear iterative schemes}
 $P_k$ is the same for all $k \in \N$ (so are $N_k$ and $B_k$).
 \begin{quote}
   When is such a method efficient?
@@ -651,7 +652,7 @@ $P$ is often called a preconditioner for $A$.
   that is, $\tilde{x}_k = x_k\ \forall k \in \N$ if $\tilde{x}_0 = x_0$.
 \end{remark}
 
-\subsection{Richardson iteration}
+\subsection*{Richardson iteration}
 \begin{definition}
   $A \in \F^{n\times n}, b \in \F^n$. The stationary Richardson method for $Ax=b$ with an initial guess $x_0 \in \F^n$ is given by
   \begin{equation*}
@@ -668,6 +669,7 @@ $P$ is often called a preconditioner for $A$.
   The iteration matrix is given by $T_k = I - \alpha_k A$.
 \end{definition}
 \begin{theorem}
+  \label{thm:5.7}
   Let $A \in \C^{n\times n}$. The stationary Richardson method with zero initial guess converges (for any linear system $Ax = b$) if and only if
   \begin{equation*}
     \frac{2 \Re \lambda}{\alpha |\lambda|^2} > 1 \quad \forall \lambda \in \spectrum{A}
@@ -675,9 +677,19 @@ $P$ is often called a preconditioner for $A$.
 \end{theorem}
 \begin{proof}
   \TODO
+  First, the iteration converges $\forall b \in \C^n$ (after Theorem \ref{thm:5.7}) if and only if
+  \begin{equation*}
+    \rho(B) < 1\ \Leftrightarrow\
+    \begin{cases}
+      \alpha > 0 \\ \alpha < \frac{2}{\lambda_1}
+    \end{cases}
+    \Leftrightarrow\ \alpha \in (0, \frac{2}{\alpha_1})
+  \end{equation*}
+  Consider $\alpha \in (0, \frac{2}{\alpha_1})$ and $\Phi_\alpha:\ \R \rightarrow \R$ given by $\Phi_\alpha(\lambda) = \abs{1 - \alpha \lambda} \forall \lambda \in \R$
 \end{proof}
 
 \begin{theorem}
+  \label{thm:5.8}
   Let $A \in \C^{n\times n}$, $\spectrum{A} = \set{\lambda_1,\ldots,\lambda_n} \subset \R$ with $\lambda_1 \geq \ldots \geq \lambda_n > 0$. Then the stationary Richardson scheme for $Ax = b$ converges with any $b \in \C^n$ if and only if $\alpha \in (0, \frac{2}{\lambda_1})$.
 
   Furthermore, $\alpha_* = \frac{2}{\lambda_1+\lambda_n}$ is the unique minimizer of $\rho(B)$ with respect to $\alpha \in \R\setminus\set{0}$, and it yields $\rho(B) = \frac{\kappa - 1}{\kappa + 1} = \frac{\lambda_1 - \lambda_n}{\lambda_1 + \lambda_n}$.
@@ -688,7 +700,7 @@ $P$ is often called a preconditioner for $A$.
   \TODO
 \end{proof}
 
-\subsection{Iteration methods for systems with symmetric positive matrices}
+\subsection*{Iteration methods for systems with symmetric positive matrices}
 $\spectrum{A} = \set{\lambda_k}_{k=1}^n \subseteq \R$ with $\lambda_1 \geq \ldots \geq \lambda_n$. Then $A$ is positive definite if and only if
 \begin{equation*}
   \min_{x \in \R^n \setminus \set{0}} \frac{x^*Ax}{x^*x} = \lambda_n > 0
@@ -717,7 +729,7 @@ Since $A$ is SPD the function $\normempty_A:\ \R^n \rightarrow \R$ given by $\no
   J(x+e) - J(x) = \frac{1}{2} \norm{e}_A^2
 \end{equation*}
 
-\subsection{Gradient-type methods for systems with SPD matrices.}
+\subsection*{Gradient-type methods for systems with SPD matrices.}
 
 Solve $Ax = b$, $b \in \R^n$ with $A \in \R^{n\times n}$ SPD and $x_0 \in \R^n$ an initial guess. The gradient descent method is given by
 \begin{equation*}
@@ -791,7 +803,7 @@ The optimal value of $\alpha_k$ is given by
   \TODO[]
 \end{proof}
 
-\subsection{Krylov subspaces}
+\subsection*{Krylov subspaces}
 Let $\mathcal{K}_k = \mathcal{K}_k(A, r_0) = \textnormal{span}\set{A_j r_0}_{j=0}^{k-1} = \textnormal{span} \set{r_0, A r_0, \ldots, A^{k-1} r_0}$. Obviously $\mathcal{K}_k \subseteq \mathcal{K}_{k+1}\  \forall k \in \N$.
 \begin{remark}
   $r_{k-1} \in \mathcal{K}_k$ and $x_k - x_0 \in \mathcal{K}_k \quad \forall k \in \N$.
@@ -892,7 +904,7 @@ Let $\mathcal{K}_k = \mathcal{K}_k(A, r_0) = \textnormal{span}\set{A_j r_0}_{j=0
 
   If $q_k \in Q_k$, then $\pi_k \in P_{k-1}$ given by $\pi_k(t) = \frac{1}{t}(1-q_k(t))$ satisfies $\deg(\pi_k) = k-1$ and $e_k = q_k(A)e_0$ implies $x_k - x_0 = \pi_k(A) r_0$.
 \end{remark}
-\subsection{Conjugate-gradient method}
+\subsection*{Conjugate-gradient method}
 $A \in \F^{n\times n}$ Hermitian positive definite ($\F = \R$: symmetric) and $b, x_0 \in \F^n$. As $A$ is Hermitian positive definite, it induces an inner product
 \begin{equation*}
   \iprod{u,v}_A:\ \F^n \times \F^n \rightarrow \F \quad \text{given by}
@@ -1062,6 +1074,7 @@ The coefficients correspond to the inner product.
 \end{example*}
 \addtocounter{theorem}{-1}
 \begin{lemma}[A]
+  \label{lem:8.1A}
   Let $A \in \F^{n\times n}$ be invertible, $r_0 \in \F^n$ be non-zero.
 
   Let $m = \max_{k \in \N} \dim \K_k(A,r_0) \in \N$. Then
@@ -1151,6 +1164,7 @@ The coefficients correspond to the inner product.
 \end{lemma}
 \TODO[Proof]
 \begin{theorem}
+  \label{thm:8.3}
   Let $A \in \F^{n\times n}$ be Hermitian positive definite, $b, x_0 \in \F^n$ and $r_0 = b - Ax_0$. Then for each $k \in \N$, the k-th CG-iteration for $Ax = b$ and initial guess $x_0$, $x_k = x_0 + \argmin_{y \in \K_k(A,r_0)} \norm{y - A^{-1} r_0}_A$, satisfies
   \begin{equation*}
     \norm{x_k - x}_A \leq 2 \left(\frac{\sqrt{a}-1}{\sqrt{a}+1}\right)^k \norm{x_0 - x}_A,
@@ -1177,7 +1191,7 @@ The coefficients correspond to the inner product.
 
   Instead of $( \frac{a-1}{a+1} )^k $, we have $( \frac{\sqrt{a}-1}{\sqrt{a}+1} )^k $.
 \end{remark*}
-\subsection{Preconditioned CG-iteration}
+\subsection*{Preconditioned CG-iteration}
 Our assumptions: $k \in \N,\ A \in \F^{n\times n}$ Hermitian positive definite, $\lambda,\Lambda$ - spectral bounds, maybe unfavorable
 \begin{example*}
   \begin{equation*}
@@ -1236,6 +1250,7 @@ Our assumptions: $k \in \N,\ A \in \F^{n\times n}$ Hermitian positive definite, 
   \end{equation*}
 \end{proof}
 \begin{proposition}
+  \label{prop:9.2}
   Let $A \in \F^{n\times n}$ be HPD, $R \in \F^{n\times n}$ be Hermitian such that $\rho(I-RA) < 1$. Then $R$ is positive definite and, if $R = CC^*$ for some $C \in \F^{n\times n}$, then $\tilde{A} = C^* A C$ satisfies
   \begin{equation*}
     \lambda_{\max}(\tilde{A})\leq 1 + \rho,\ \lambda_{\min}(\tilde{A}) \geq 1 - \rho \quad (\Rightarrow \cond_2 \tilde{A} = \frac{\lambda_{\max}}{\lambda_{\min}} \leq \frac{1+\rho}{1-\rho})
@@ -1319,6 +1334,214 @@ Our assumptions: $k \in \N,\ A \in \F^{n\times n}$ Hermitian positive definite, 
 \begin{proof}
   Given above.
 \end{proof}
+The above proposition allows to apply the error bound of Theorem \ref{thm:8.3} to the iterates produced by Algorithm \ref{alg:9.3}. Since, as we noted at the beginning of the lecture,
+$\norm{x_k - x}_A = \norm{\tilde{x_k} - \tilde{x}}_A\ \forall k \in \N$. By Proposition \ref{prop:9.2}, $\rho(I - P^{-1} A) = \rho < 1$ implies $\cond_2(C^* A C) \leq \frac{1+\rho}{1-\rho}$, and the further $\rho$ is away from 1, the smaller $\cond_2(C^* A C)$ is and faster the bound of Theorem \ref{thm:8.3} converges to zero with respect to the iteration index $k \in \N$.
 
-Note that $\norm{x_k - x}_A = \norm{\tilde{x_k} - \tilde{x}}_A$
-\end{document}
+\subsection*{Chebyshev iterative methods}
+Lemma \ref{lem:8.2}A above considers $q_k \in Q_k$ given by $q_k = \frac{T_k \circ \phi}{T_k(\tau)}$, where $k\in \N$, $T_k$ is the Chebyshev polynomial of the first kind and degree $k$, $\tau = \frac{\kappa +1}{\kappa - 1}$ with $\kappa = \frac{\Lambda}{\lambda}$ and $\phi:\ \R \rightarrow \R$ is given by:
+\begin{equation*}
+  \phi(t) = -\frac{2t - (\Lambda + \lambda)}{\Lambda - \lambda} \quad \forall t \in \R
+\end{equation*}
+The parameters $\lambda,\Lambda > 0$ are choses so that $\lambda < \Lambda$ and $\spectrum{A} \subseteq [\lambda, \Lambda]$ for an Hermitian matrix $A \in \F^{n\times n}$. Such a choice of $q_k$ leads to the so-called \emph{Chebyshev iterative methods} of two types.
+
+\begin{enumerate}[label=(\roman*)]
+  \item \textbf{Chebyshev method of Richardson type.}
+
+    For $m \in \N$, let $q_m = \frac{T_m \circ \phi}{T_m(\tau)}$ be realized by $m$ Richardson iterations: for each $k \in \set{1,\ldots,m}$, choose $q_k \in Q_k$ so that
+    \begin{equation*}
+      q_k(t) = (1 - \alpha_1 t) \cdots (1 - \alpha_m t) \quad \forall t \in \R
+    \end{equation*}
+    where $\alpha_1, \ldots, \alpha_m$ are the roots of $T_m \circ \phi$, i.e., (form a permutation of)
+    \begin{equation*}
+      {\phi}^{-1}(\cos(\frac{\pi}{m} (j + \frac{1}{2})) \text{ with } j \in \set{0,\ldots,m-1}
+      \end{equation*}
+      After $m$ iterations, a stopping criterion may be checked and the process may be restarted, so that
+      \begin{equation*}
+        q_{mi+k} = q_k (q_m)^i \quad \forall i \in \N,\ k \in \set{1,\ldots,m}.
+      \end{equation*}
+      Note that while $q_m$ is a rescaled Chebyshev polynomial, $q_1, \ldots, q_m$ are not such. Lemma \ref{lem:8.2}A gives a convergence bound for the any integral number of such blocks at $m$ Richardson iterations. The recurrence for $x_k$ involves only two consecutive terms (as in any Richardson iteration).
+    \item \textbf{Chebychev method of Krylov type}
+
+      For $k \in \N,\ q_k \in Q_k$ is chosen as follows:
+      \begin{equation*}
+        q_k = \frac{T_k \circ \phi}{T_k(\tau)}
+      \end{equation*}
+      This is not a Richardson iteration:
+      \begin{equation*}
+        \set*{\cos\frac{\pi}{k}(j+\frac{1}{2})}_{j=0}^{k-1}\ \bigcap\  \set*{\cos\frac{\pi}{k+1}(j+\frac{1}{2})}_{j=0}^{k}
+      \end{equation*}
+      are disjoint sets, so that $\frac{q_{k+1}}{q_k}$ is not a polynomial $\forall k \in \N$. So this method cannot be realized as a Richardson iteration (computing each iterate $x_k$ with $k \in \N$ by an independent sequence of $k$ Richardson iterations is very expensive and therefore not smart). Such a method, however, can be efficiently realized using the three-term recurrence relation for $\set{T_k}_{k \in \N}$, which translates into such for $\set{q_k}_{k \in \N}$, which, thanks to Remark \ref{rem:7.3}, yields such for $\set{\pi_k}_{k \in \N}$ and hence for $ \set{x_k=x_0 + \pi_k(A) r_0}_{k \in \N}$. Indeed, we have
+      \begin{equation*}
+        T_{k+1}(t)=(\xi_{k+1} + \eta_{k+1} t) T_k(t) + \zeta_{k+1} T_{k-1}(t) \quad \forall t \in \R\ \forall k \in \N
+      \end{equation*}
+      with $\xi_{k+1} = 0,\ \eta_{k+1} = 2 \text{ and } \zeta_{k+1} = -1$ for $k \in \N$.
+
+      (We considered such a general form of a three-term recurrence relation for orthogonal polynomials in lecture 8, see right below Remark \ref{rem:8.1})
+
+      Let us set $c_k = T_k(\tau)$ $\forall k \in \N_0$. As we showed in the proof of Lemma \ref{lem:8.2}A, we have $c_k = \frac{1}{2}(\mu^k + \mu^{-k})$ $\forall k \in \N$, where $\mu = \frac{\sqrt{\kappa}+1}{\sqrt{\kappa}-1}$. Let $\omega = \frac{1}{\Lambda + \lambda}$. Then
+      \begin{equation*}
+        \phi(t) = \tau - \frac{2t}{\Lambda - \lambda} = \tau (1 - \omega t) \quad \forall t \in \R
+      \end{equation*}
+      \TODO[Something doesn't add up here, i.e.]
+      \textcolor{red}{
+        \begin{gather*}
+          \kappa = \frac{\Lambda}{\lambda},\ \tau = \frac{\kappa + 1}{\kappa - 1} = \frac{\Lambda + \lambda}{\Lambda - \lambda}\\
+          \phi(t) = \tau - \frac{2t}{\Lambda - \lambda} = \tau (1 - \frac{2t}{\tau(\Lambda - \lambda)}) = \tau (1 - \frac{2t}{\Lambda + \lambda})\\
+        \end{gather*}
+      }
+
+      Then first, $q_0(t) = 1$ and $q_1(t) = \frac{1}{\tau} \phi(t) = 1 - \omega t$ $\forall t \in \R$, \TODO[V.K. wrote $\alpha_0$] so that $\pi_0(t) =  0$ and $\pi_1(t) = \frac{1}{t} (1 - q_1(t)) = \omega$ $\forall t \in \R$. So we have
+      \begin{equation*}
+        x_1 = x_0 + \omega r_0 \quad \text{(c.f. Theorem \ref{thm:5.8})}
+      \end{equation*}
+      Further, for each $k \in \N$, the three-term recurrence relation between $T_{k+1}, T_k$ and $T_{k-1}$ gives
+      \begin{equation*}
+        c_{k+1} = (\xi_{k+1} + \eta_{k+1} \tau) c_k + \zeta_{k+1} c_{k-1} \tag{$\star$}
+      \end{equation*}
+      \begin{multline*}
+        q_{k+1}(t) = \frac{c_k}{c_{k+1}} (\xi_{k+1} + \eta_{k+1} \phi(t)) q_k(t) + \frac{c_{k-1}}{c_{k+1}} \zeta_{k+1} q_{k-1}(t)=\\
+        = \frac{c_k}{c_{k+1}} (\xi_{k+1} + \eta_{k+1} \phi(t)) q_k(t) + (1 - \frac{c_k}{c_{k+1}}(\xi_{k+1} + \eta_{k+1} \tau)) q_{k-1}(t) \quad \forall t \in \R \tag{\textasteriskcentered}
+      \end{multline*}
+      Let us look at the incremental iteration updates:
+      $x_k - x_{k-1} = \sigma_k(A) r_0$ $\forall k \in \N$, where, as in Remark \ref{rem:8.1},
+      \begin{equation*}
+        \sigma_k = \pi_k - \pi_{k-1}\ \in P_{k-1}\setminus P_{k-2} \quad \forall k \in \N \quad (P_{-1} = \emptyset)
+      \end{equation*}
+      For these incremental polynomials, we have
+      \begin{equation*}
+        \sigma_k(t) = \frac{1}{t} (1 - q_k(t) - 1 + q_{k-1}(t)) = \frac{1}{t} (q_{k-1}(t) - q_k(t)) \quad \forall t \in \R\ \forall k \in \N
+      \end{equation*}
+      and obtain the following from (\textasteriskcentered):
+      \begin{align*}
+        \sigma_{k+1}(t) &=
+        \begin{multlined}[t]
+          - \frac{c_k}{c_{k+1}} \frac{1}{t} (\xi_{k+1} + \eta_{k+1} \tau(1-\omega t)) q_k(t) + \frac{1}{t} q_k(t)\\+\left(\frac{c_k}{c_{k+1}}(\xi_{k+1} + \eta_{k+1} \tau) - 1\right) \frac{1}{t} q_{k-1}(t)
+        \end{multlined}\\
+        &= \frac{c_k}{c_{k+1}} \eta_{k+1} \omega \tau q_k(t) + \left(\frac{c_k}{c_{k+1}}(\xi_{k+1} + \eta_{k+1} \tau) - 1\right) \sigma_k(t) \quad \forall t \in \R\ \forall k \in \N,
+      \end{align*}
+      i.e.
+      \begin{equation*}
+        \sigma_{k+1} = \frac{c_k}{c_{k+1}} \eta_{k+1} \omega \tau q_k + \left(\frac{c_k}{c_{k+1}}(\xi_{k+1} + \eta_{k+1} \tau) - 1\right) \sigma_k \quad \forall k \in \N
+      \end{equation*}
+      Setting
+      \begin{align*}
+        \alpha_{k+1} &= \frac{c_k}{c_{k+1}} \eta_{k+1} \tau \quad \text{and}\\
+        \beta_{k+1} &= \frac{c_k}{c_{k+1}}(\xi_{k+1} + \eta_{k+1} \tau) - 1 \quad \forall k \in \N,
+      \end{align*}
+      we arrive at
+      \begin{equation*}
+        \sigma_{k+1} = \alpha_{k+1} \omega q_k + \beta_{k+1} \sigma_k \quad \forall k \in \N,
+      \end{equation*}
+      which means
+      \begin{equation*}
+        \boxed{
+          x_{k+1} = x_k + \alpha_{k+1} \omega r_k + \beta_{k+1} (x_k - x_{k-1}) \quad \forall k \in \N \tag{\bigast}
+        }
+      \end{equation*}
+      Introducing $p_k = x_k - x_{k-1}$, we rewrite the above three-term recurrence as follows:
+      \begin{equation*}
+        \begin{cases}
+          x_k = x_{k-1} + p_k\\
+          p_{k+1} = \alpha_{k+1} \omega r_k + \beta_{k+1} p_k\\
+        \end{cases} \quad \forall k \in \N \tag{\bigast\bigast}
+      \end{equation*}
+      Let us now specify the expressions for the coefficients. For the Chebyshev polynomials of the first kind, we have $\xi_{k+1} = 0$ and $\eta_{k+1} = 2$ $\forall k \in \N$, so that $\alpha = 2 \frac{c_k}{c_{k+1}} \tau$ and $\beta = \alpha_{k+1} - 1$ $\forall k \in \N$. The recursion (\bigast\bigast) is initialized with $p_1 = \omega r_0$. Finally,
+      \begin{multline*}
+        \alpha_{k+1} = 2\ \frac{c_k}{c_{k+1}} \tau = 2\ \frac{\mu^k + \mu^{-k}}{\mu^{k+1} + \mu^{-(k+1)}} \tau
+        = 2\ \frac{\tau}{\mu}\ \frac{1+\mu^{-2k}}{1+\mu^{-2(k+1)}} \\= 2 \left(1 - \frac{2 \sqrt{\kappa}}{(\sqrt{\kappa}+1)^2}\right) \left(1 + \frac{1 - \mu^{-2}}{\mu^{2k}+\mu^{-2}}\right) \quad \forall k \in \N \\
+      \end{multline*}
+      $\text{with } \mu = \frac{\sqrt{\kappa}+1}{\sqrt{\kappa}-1} > 1 \text{ (as above)}$, so that $\lim_{k \rightarrow \infty} \alpha_{k+1} = 2\left(1 - \frac{2 \sqrt{\kappa}}{(\sqrt{\kappa}+1)^2}\right) \in (1,2)$.
+      From ($\star$) above, we obtain
+      \begin{equation*}
+        \frac{c_{k+1}}{c_k} = 2 \tau - \frac{c_{k-1}}{c_k} \quad \forall k \in \N
+      \end{equation*}
+      so that
+      \begin{equation*}
+        \alpha_{k+1} = \frac{2 \tau}{2 \tau - \frac{c_{k-1}}{c_k}} = \frac{1}{1 - \frac{\alpha_k}{4 \tau^2}} \quad \forall k \in \N
+      \end{equation*}
+      The (Krylov-type) Chebyshev method then takes the following form.
+      \begin{algorithm}[Krylov-type Chebyshev method]~\\[\parskip]
+        \label{alg:9.5}
+        Given: $A \in \F^{n\times n}$ Hermitian positive definite, $b, x_0 \in \F^n, \Lambda > 0, \lambda \in (0,\Lambda)$.
+
+        Initialize: set $\kappa = \frac{\Lambda}{\lambda},\ \tau = \frac{\kappa + 1}{\kappa - 1},\ \omega = \frac{2}{\lambda + \Lambda},\ r_0 = b- Ax_0,\ p_1 = \omega r_0, \alpha_0 = 2, \alpha_1 = \frac{1}{1 - \frac{\alpha_0}{4 \tau^2}}$.
+
+        Iterate: for $k = 1,2,\ldots$ do:
+
+        \hspace{2em} set $x_k = x_{k-1} + p_k$
+
+        \hspace{2em} set $r_k = r_{k-1} - A p_k$
+
+        \hspace{2em} if $r_k = 0$ (or in practice, small), then terminate
+
+        \hspace{2em} set $\alpha_{k+1} = \frac{1}{1 - \frac{\alpha_k}{4 \tau^2}}$
+
+        \hspace{2em} set $p_{k+1} = \alpha_{k+1} \omega r_k + (\alpha_{k+1} - 1) p_k$
+      \end{algorithm}
+  \end{enumerate}
+  Algorithm \ref{alg:9.5} is very similar to Algorithm \ref{alg:7.8}. The only essential difference is how the coefficients of the recurrence are determined. For the CG method, they are adapted to the matrix $A$ and initial residual $r_0$ -- specifically, they correspond to $A,r_0$-dependent measure $\Theta$, which was discussed in Remark \ref{rem:8.1}.
+
+  In the Chebyshev method, the recurrence coefficients corresponding to the measure of orthogonality of the Chebyshev polynomials mapped to $[\lambda, \Lambda]$, whose only relation to $A$ is through $\lambda$ and $\Lambda$ and which is independent of $r_0$.
+
+  Again Lemma \ref{lem:8.2}A gives a convergence bound for any number of steps.
+
+  \subsection*{Arnoldi decomposition}
+  The CG method is based on constructing a sequence $\set{p_k}_{k \in \N}$ such that $p_1, \ldots, p_k$ is an $A$-orthogonal basis for $\K_k(A,r_0)$ $\forall k \in \N$. This is clearly not possible when $A$ is not Hermitian positive definite. In such casesm we need to give up the $A$-orthogonality, but still can construct a sequence $\set{v_k}_{k \in \N}$ such that $v_1, \ldots, v_k$ form a basis for $\K_k(A,r_0)$ that is orthogonal w.r.t. the standard inner product $\forall k \in \N$. This can be done by Gram-Schmidt orthogonalization, resulting in what is called \emph{Arnoldi decomposition}.
+  \begin{algorithm}[Arnoldi decomposition]~\\[\parskip]
+    \label{alg:9.6}
+    Given: $A \in \F^{n\times n}$, $v \in \F^n$
+
+    Initialize: set $v_1 = \frac{v}{\norm{v}_2}$
+
+    Orthogonalize: for $k = 1,2,\ldots, n-1$ do:
+
+    \hspace{2em} set $w_{k+1} = A v_k$
+
+    \hspace{2em} set $h_{ik} = v_i^* w_{k+1}$ for $i = 1,\ldots,k$
+
+    \hspace{2em} set $\tilde{v}_{k+1} = w_{k+1} - \sum_{i=1}^k h_{ik} v_i$
+
+    \hspace{2em} set $h_{k+1,k} = \norm{\tilde{v}_{k+1}}_2$
+
+    \hspace{2em} if $h_{k+1,k} = 0$, then terminate
+
+    \hspace{2em} set $v_{k+1} = \frac{\tilde{v}_{k+1}}{k+1}$\TODO[typo]
+
+    Output: \emph{Arnoldi vectors} $v_1, \ldots, v_k$ and $h_{ij}$ with $j \in \set{1,\ldots,m}$ and $i \in \set{1,\ldots,j+1}$, where $m$ is the number of steps performed.
+  \end{algorithm}
+  Algorithm \ref{alg:9.6} terminates at step $m = \max_{k \in \N} \dim \K_k(A,v)$ (see Lemma \ref{lem:8.1A}A) and produces a matrix $V_m = [v_1,\ldots,v_m] \in \F^{n\times m}$ with orthonormal columns and an \emph{upper Hessenberg matrix}
+  \begin{equation*}
+    H_m =
+    \begin{pmatrix}
+      h_{11} & h_{12} & h_{13} & \cdots & h_{1m}\\
+      h_{21} & h_{22} & h_{23} & \cdots & h_{2m}\\
+      0 & h_{32} & h_{33} &\cdots & h_{3m}\\
+      \vdots & \ddots & \ddots  &\ddots & \vdots\\
+      0 & \cdots & 0 & h_{mm-1} & h_{mm}
+    \end{pmatrix} \quad \in \F^{m\times m}.
+  \end{equation*}
+  ( $A \in \F^{m \times m}$ is upper Hessenberg if $a_{ij} = 0$ for $i > j+1$ )
+
+  For any $k \in \N$, let $V_k = [v_1,\ldots,v_k] \in \F^{n\times k}$, $H_k \in \F^{k \times k}$ as above and $\hat{H}_k = \blockVertical{H_k}{0 \ldots 0\ h_{k+1,k}} \in \F^{(k+1)\times k}$.
+
+  Then we have the following relations:
+  \begin{equation*}
+    V_k^* A V_k = H_k \quad \text{ and } \quad V_{k+1}^* A V_k = \hat{H}_k
+  \end{equation*}
+  For each $k \in \set{1,\ldots,m}$, $v_1, \ldots, v_k$ form an orthonormal basis for $\K_k(A,v)$
+
+  \begin{remark}
+    \label{rem:9.7}
+    If the Arnoldi decomposition is constructed for an Hermitian matrix $A$, then $H_m = V_m^* A V_m$ is also Hermitian and hence tridiagonal. In this case, the Arnoldi decomposition is called \emph{Lanczos decomposition} and the Arnoldi vectors are called \emph{Lanczos vectors}.
+  \end{remark}
+  We will consider, for $A \in \F^{n\times n}$ invertible, $b, x_0 \in \F^n$ and $r_0 = b - Ax_0$, two Krylov methods for the approximate solution of $Ax = b$.
+  \begin{enumerate}[label=(\roman*)]
+    \item The \emph{Arnoldi method} defines for each $k \in \N$, $x_k \in x_0 + \K_k(A,r_0)$ by
+      \begin{equation*}
+        r_k = b - Ax_k \perp \K_k(A,r_0).
+      \end{equation*}
+      When $A$ is Hermitian positive definite, the method is called \emph{Lanczos method}. In this case, the iterates coincide (in exact arithmetic) with the iterates of the CG method (see Lemma \ref{lem:7.4}) The two methods, however, use different bases to construct the same iterates.
+    \item The \emph{method of generalized minimal residual} (GMRES) defines, for each $k \in \N$, $x_k \in x_0 + \K_k(A,r_0)$ by minimizing $\norm{r_k}_2$.
+  \end{enumerate}
+  Note that $\dim \K_{k+1}(A,r_0) = k$ holds for $k \in \N_0$ if and only if $A^{-1} r_0 \in \K_k(A,r_0) \setminus K_{k-1}(A,r_0)$, as we showed in Lemma \ref{lem:8.1A}A assuming only invertibility of $A$, in which case, for $r_0 \neq 0$, these two methods, and any other Krylov method doing something reasonable on Krylov subspaces, find the exact solution if and only if $k = \max_{\ell \in \N} \dim \K_{\ell}(A,r_0)$.
+  \end{document}
